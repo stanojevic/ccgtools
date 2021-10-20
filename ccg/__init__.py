@@ -2,14 +2,14 @@ from ccg.derivation import Node, DerivationLoader
 from ccg.category import Category
 from ccg import combinators as comb
 
-load_file = DerivationLoader.iter_from_file
-str2deriv = DerivationLoader.from_str
-str2cat = Category.from_str
+derivs_from_file = DerivationLoader.iter_from_file
+deriv_from_str = DerivationLoader.from_str
+cat_from_str = Category.from_str
 
 TypeChanging1 = comb.TypeChanging1  # class
 TypeRaising = comb.TypeRaising  # class
-tr_np_fwd = TypeRaising(cat_res=str2cat("S"), cat_arg=str2cat("NP"), is_forward=True)
-tr_np_bck = TypeRaising(cat_res=str2cat("S\\NP"), cat_arg=str2cat("NP"), is_forward=False)
+tr_np_fwd = TypeRaising(cat_res=cat_from_str("S"), cat_arg=cat_from_str("NP"), is_forward=True)
+tr_np_bck = TypeRaising(cat_res=cat_from_str("S\\NP"), cat_arg=cat_from_str("NP"), is_forward=False)
 
 TypeChanging2 = comb.TypeChanging2  # class
 RightAdjoin = comb.RightAdjoin  # class
