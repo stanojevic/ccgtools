@@ -1,0 +1,37 @@
+
+# these are some special symbols  ⇒ Λ ∨ ∀ λ ∃ skolem
+
+N							word'
+S\NP/NP							λxλy word'(y, x)
+(S/(S\NP))/N			every,each		λpλq     ∀x [ p x ⇒ q x ]
+(S\(S/NP))/N			every,each		λpλq     ∀x [ p x ⇒ q x ]
+((S\NP)\((S\NP)/NP))/N		every,each		λpλqλy   ∀x [ p x ⇒ q x y ]
+((S\NP/NP)\((S\NP/NP)/NP))/N	every,each		λpλqλyλz ∀x [ p x ⇒ q x y z ]
+S/(S\NP)			everyone		λq     ∀x [ person' x ⇒ q x ]
+S\(S/NP)			everyone		λq     ∀x [ person' x ⇒ q x ]
+(S\NP)\((S\NP)/NP)		everyone		λqλy   ∀x [ person' x ⇒ q x y ]
+(S\NP/NP)\((S\NP/NP)/NP)	everyone		λqλyλz ∀x [ person' x ⇒ q x y z ]
+NP/N				the			λpλq q skolem(λx p x Λ def' x)
+NP/N				a,an,some		λpλq q skolem(p)
+NP/N				his			λqλp p skolem(λx q x Λ of'(him', x))
+NP/N				her			λqλp p skolem(λx q x Λ of'(her', x))
+NP				he			λp p him'
+NP				she			λp p her'
+NP							λp p word'
+N\N/(S/NP)			that,which,who,whom	λqλnλy n y Λ q y
+N\N/(S\NP)			that,which,who,whom	λqλnλy n y Λ q y
+
+(S[dcl]\NP)/(S[b]\NP)	will	λp λx will' (p x)
+((S\NP)\((S\NP)/PP))/NP		as	λxλp p (word' x)
+
+# TODO check with Mark if the one bellow is correct
+NP\NP/(S/NP)			that,which,who,whom	λqλnλy n y Λ n q
+N/N							λnλy word' y Λ n y
+# NP\NP/NP			of,at,for,in,about,by	λnλmλp m p Λ word'(n p)
+NP\NP/NP			of,at,for,in,about,by	λnλm word'(m, n)
+
+# ((S\NP)\(S\NP))/N[num]			λnλpλx word' n (p x)
+((S\NP)\(S\NP))/N[num]			λnλpλx word'(n, p x)
+
+# TODO check this in the treebank (do we also include other forms of prusuation and wanting? (prusuade, pursuades, pursuading)
+S\NP/(S[to]\NP)/NP		pursuaded,wanted	λxλpλy persuade' (p x) x y

@@ -1,0 +1,4 @@
+include ccg/*.txt
+include ccg/*.jar
+include ccg/*.sty
+exclude ccg/astar_search

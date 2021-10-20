@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" name="Create Jar for Project easyccg-lib">
+
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="bin"/>
+        <javac srcdir="src" destdir="bin"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="../ccg-astar-search.jar" basedir="bin"/>
+    </target>
+
+</project>
+
