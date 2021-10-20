@@ -193,7 +193,7 @@ class SimpleNode:
         with open(file, 'rb') as fh:
             x = fh.read()
         x = x.decode()
-        x = re.sub(r"<svg width=\".*?\" height=\".*?\"", "<svg ", x)
+        x = re.sub(r"<svg width=\".*?\" height=\".*?\"", "<svg width=\"100%\" height=\"100%\"", x)
         return x
 
     def visualize(self, graph_label: str = "CCG derivation", file_type: str = "pdf") -> None:
