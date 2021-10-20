@@ -192,7 +192,9 @@ class SimpleNode:
         self.save(file)
         with open(file, 'rb') as fh:
             x = fh.read()
-        return x.decode()
+        x = x.decode()
+        x = re.sub(r"<svg width=\".*?\" height=\".*?\"", "<svg ", x)
+        return x
 
     def visualize(self, graph_label: str = "CCG derivation", file_type: str = "pdf") -> None:
         file = create_temp_file(graph_label, file_type)
