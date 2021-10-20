@@ -4,7 +4,7 @@ Don't play with this code yet. NOT READY
 
 ## Installation
 
-Will work with `pip install .`
+Will work with `pip install git+https://github.com/stanojevic/ccgtools`
 
 ## Notebook
 
