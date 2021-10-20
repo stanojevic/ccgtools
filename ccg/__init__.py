@@ -19,7 +19,7 @@ glue = comb.Glue()
 
 Conj = comb.Conj  # class
 up_conj = comb.Conj(is_bottom=False)
-bottom_conj = comb.Conj(is_bottom=Ftrue)
+bottom_conj = comb.Conj(is_bottom=True)
 
 Punc = comb.Punc  # class
 lpunc = comb.Punc(punc_is_left=True)
