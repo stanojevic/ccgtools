@@ -185,7 +185,7 @@ class SimpleNode:
         self.text_size = text_size
         self.position = position
 
-    def ipython_svg(self):
+    def ipython(self):
         graph_label = "ipython_tree"
         file_type = "svg"
         file = create_temp_file(graph_label, file_type)

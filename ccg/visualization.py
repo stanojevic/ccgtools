@@ -88,9 +88,9 @@ class CCG_dot_Visualize:
             raise Exception("wrong number of children")
 
     @staticmethod
-    def ipython_svg(tree: Node):
+    def ipython(tree: Node):
         simple = CCG_dot_Visualize._to_simple_node(tree)
-        return simple.ipython_svg()
+        return simple.ipython()
 
     @staticmethod
     def save(tree: Node, fn: str) -> None:
@@ -111,7 +111,7 @@ class DepsDesc:
         self.deps = deps
         self.show_unconnected_words = True
 
-    def _repr_svg_(self):
+    def _repr_html_(self):
         graph_label = "ipython_tree"
         file_type = "svg"
         file = create_temp_file(graph_label, file_type)

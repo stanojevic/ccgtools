@@ -1,27 +1,15 @@
 from setuptools import setup, find_packages
+from Cython.Build import cythonize
 from glob import glob
 import os
 
-USE_CYTHON = True  # os.environ.get('USE_CYTHON', "False") in ["True", "1"]
-
-
-if USE_CYTHON:
-    try:
-        from Cython.Build import cythonize
-    except ImportError:
-        sys.exit("\n\n\tCould not import Cython, which is required to build ccgtools.\n\n")
-    extensions = cythonize("ccg/**/*.pyx", language_level=3)
-else:
-    from setuptools import Extension
-    extensions = [Extension(x[:-2].replace("/", "."), [x]) for x in glob("ccg/*.c")]
+extensions = cythonize("ccg/**/*.pyx", language_level=3)
 
 with open('requirements.txt') as fh:
     install_requires = [x.strip() for x in fh]
 
-
 with open('README.md', encoding='utf-8') as fh:
     long_description = fh.read()
-
 
 setup(
     name="ccgtools",

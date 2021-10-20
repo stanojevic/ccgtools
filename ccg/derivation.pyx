@@ -140,9 +140,9 @@ cdef class Node:
         if postorder:
             yield self
 
-    def _repr_svg_(self):
+    def _repr_html_(self):
         from .visualization import CCG_dot_Visualize
-        return CCG_dot_Visualize.ipython_svg(self)
+        return CCG_dot_Visualize.ipython(self)
 
     def print_latex(self):
         from .visualization import LaTeX
