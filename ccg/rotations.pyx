@@ -32,7 +32,9 @@ cdef inline Node _usafe(UnaryCombinator c, Node x):
 
 cdef class TreeTransducer:
 
-    def __init__(self, bint is_extreme, object g: Grammar):
+    def __init__(self, bint is_extreme, object g: Grammar=None):
+        if g is None:
+            g = Grammar()
         self.is_extreme = is_extreme
         self.max_fwd_B = g.max_fwd_B
         self.max_bck_B = g.max_bck_B

@@ -26,6 +26,12 @@ setup(
     include_package_data=True,
     install_requires=install_requires,
     zip_safe=False,
+    # extras_require={
+    #     'interactive': ['matplotlib>=2.2.0,, 'jupyter'],
+    # },
+    # entry_points={
+    #     'console_scripts': ['my-command=exampleproject.example:main']
+    # },
     classifiers=[
                     "Programming Language :: Python :: 3",
                     "License :: OSI Approved :: MIT License",

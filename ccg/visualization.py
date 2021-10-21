@@ -2,6 +2,58 @@ from .combinators import *
 from .universal_tree_visualization import *
 from .derivation import Node
 from typing import List, Tuple
+import os
+import shutil as sh
+
+
+def jupyter_display(tree, vtype=None, title=None, warning=False):
+    from IPython.display import Image, display, HTML
+    if vtype is None or vtype in [1, 'latex', 'proof']:
+        try:
+            tmp_fn = create_temp_file("", "png")
+            save(tree, tmp_fn, vtype=1)
+            _jupyter_display_object_with_title(Image(tmp_fn), title=title, warning=warning)
+        except Exception as e:
+            if vtype is None:
+                jupyter_display(tree, vtype=2)
+            else:
+                raise e
+    else:
+        _jupyter_display_object_with_title(CCG_dot_Visualize._to_simple_node(tree),
+                                           title=title, warning=warning)
+
+def _jupyter_display_object_with_title(obj, title=None, warning=False):
+    from IPython.display import display, HTML
+    display(HTML("<br/>"))
+    if title:
+        display(HTML(f"<b><font size=\"3\" color=\"red\">{title}</font></b>"))
+    if warning:
+        display(HTML(f"<font color=\"red\">WARNING: {warning}</font>"))
+    display(obj)
+
+
+def jupyter_download(tree, vtype=None):
+    return jupyter_download_link(lambda fn: save(tree=tree, fn=fn, vtype=vtype), name_prefix="tree")
+
+
+def visualize(tree, vtype=None):
+    fn = create_temp_file(graph_label, file_type)
+    save(tree, fn=fn, vtype=vtype)
+    open_default(file)
+
+
+def save(tree, fn, vtype=None):
+    if vtype is None:
+        try:
+            save(tree, fn, vtype=1)
+        except Exception as e:
+            save(tree, fn, vtype=2)
+    elif vtype == 1 or vtype == 'latex' or vtype == 'proof':
+        LaTeX.save_image(tree, fn)
+    elif vtype == 2 or vtype == 'graphviz' or vtype == 'dot':
+        CCG_dot_Visualize._to_simple_node(tree).save(fn)
+    else:
+        raise Exception(f"provided vtype {vtype} is not supported")
 
 
 class CCG_dot_Visualize:
@@ -93,14 +145,9 @@ class CCG_dot_Visualize:
         return simple.ipython()
 
     @staticmethod
-    def save(tree: Node, fn: str) -> None:
+    def to_dot(tree: Node):
         simple = CCG_dot_Visualize._to_simple_node(tree)
-        simple.save(fn)
-
-    @staticmethod
-    def visualize(tree: Node, graph_label: str = "CCG derivation", file_type: str = "pdf") -> None:
-        simple = CCG_dot_Visualize._to_simple_node(tree)
-        simple.visualize(graph_label, file_type)
+        return simple.to_dot()
 
 
 class DepsDesc:
@@ -109,7 +156,7 @@ class DepsDesc:
         self.starting_position = starting_position
         self.words = words
         self.deps = deps
-        self.show_unconnected_words = True
+        self.show_unconnected_words = False
 
     def _repr_html_(self):
         graph_label = "ipython_tree"
@@ -118,6 +165,7 @@ class DepsDesc:
         self.save(file, include_disconnected_words=self.show_unconnected_words)
         with open(file) as fh:
             x = fh.read()
+        x = re.sub(r"<svg width=\".*?\" height=\".*?\"", "<svg width=\"100%\" height=\"100%\"", x)
         return x
 
     def save_simple_deps_image(self, fn: str):
@@ -194,14 +242,22 @@ class LaTeX:
     def save_image(tree: Node, fn: str):
         from os.path import realpath, dirname, join
         from os import getcwd
+        import subprocess
+        try:
+            subprocess.check_output(['kpsewhich', 'standalone.sty'])  # check that standalone.sty is installed
+        except FileNotFoundError:
+            raise Exception("You need to have kpsewhich latex program installed")
+        except subprocess.CalledProcessError:
+            raise Exception("You need to have standalone.sty latex package installed")
         ccg_sty = join(realpath(join(getcwd(), dirname(__file__))), "ccg.sty")
         run_latex(LaTeX.to_latex(tree), out_file=fn, include_files=[ccg_sty])
+
 
     @staticmethod
     def to_latex(tree: Node):
         contains_semantics = False
         tree.assign_word_positions()
-        tops = tree.topological_grouping()
+        tops = _node_topological_grouping(tree)
         terms = tops[0]
         ws = ["\\rm " + escape_latex_math(t.word) for t in terms]
         out = [" & ".join(ws)]
@@ -292,7 +348,7 @@ class ASCII_Art:
     def deriv2ascii(tree: Node) -> str:
         centerd_str = ASCII_Art.centerd_str
         tree.assign_word_positions()
-        tops = tree.topological_grouping()
+        tops = _node_topological_grouping(tree)
         terms = tops.pop(0)
         lens = [max(len(t.word)+2, len(str(t.cat))+2, 5) for t in terms]
         out = ["".join([centerd_str(t.word, l)     for t, l in zip(terms, lens)]),
@@ -323,3 +379,22 @@ class ASCII_Art:
 
         out_str = "\n".join(out)
         return out_str
+
+
+def _node_topological_grouping(node):
+    if node.is_term:
+        return [[node]]
+    elif node.is_unary:
+        return _node_topological_grouping(node.child) + [[node]]
+    elif node.is_binary:
+        ltop = _node_topological_grouping(node.left)
+        rtop = _node_topological_grouping(node.right)
+        res = []
+        for i in range(min(len(ltop), len(rtop))):
+            res.append(ltop[i]+rtop[i])
+        mtop = ltop if len(ltop)>len(rtop) else rtop
+        res += mtop[len(res):]
+        res += [[node]]
+        return res
+    else:
+        raise Exception("I didn't expect this")

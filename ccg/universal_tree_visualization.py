@@ -5,6 +5,31 @@ import atexit
 import tempfile
 import shutil as sh
 import re
+import string
+import random
+import subprocess
+
+
+def jupyter_download_link(save_func, tmp_dir="./tmp", name_prefix='tree', fmt="pdf"):
+    idd = ''.join(random.choice(string.ascii_letters) for _ in range(4))
+    fn = os.path.join(tmp_dir, f"{name_prefix}_{idd}.{fmt}")
+    os.makedirs(tmp_dir, exist_ok=True)
+    if os.path.exists(fn):
+        # try with another random file name
+        jupyter_download(save_func, tmp_dir, name_prefix, fmt)
+    try:
+        from google.colab import files
+        save_func(fn)
+        return files.download(fn)
+    except Exception as e:
+        pass
+    try:
+        from IPython.display import FileLink
+        save_func(fn)
+        return FileLink(fn)
+    except Exception as e:
+        pass
+    raise Exception("cannot call download() unless the code is ran in Notebook or Colab")
 
 
 def escape_for_dot(s: str):
@@ -24,28 +49,16 @@ def open_default(fn: str) -> None:
         raise Exception("unknown system")
 
 
-_tmp_list = []
-
-
-def delete_at_exit(x):
-    global _tmp_list
-    _tmp_list.append(x)
-
-
-def _deleting_at_exit():
-    for x in _tmp_list:
-        if os.path.isfile(x):
-            os.unlink(x)
-        elif os.path.isdir(x):
-            sh.rmtree(x)
-
-
-atexit.register(_deleting_at_exit)
+def rm_rf(x):
+    if os.path.isfile(x):
+       os.unlink(x)
+    elif os.path.isdir(x):
+       sh.rmtree(x)
 
 
 def create_temp_file(prefix: str, extension: str) -> str:
-    t = tempfile.NamedTemporaryFile(prefix=prefix + " ", suffix="." + extension).name
-    # delete_at_exit(t)
+    t = tempfile.NamedTemporaryFile(prefix=prefix + "_", suffix="." + extension).name
+    atexit.register(rm_rf, t)
     return t
 
 
@@ -59,12 +72,13 @@ def create_temp_dir(prefix: str, extension: str) -> str:
 
 def run_graphviz(dot_string: str, out_image_file: str, renderer: str = "dot") -> None:
     """renderer determines the drawing algorithm. dot is good for DAG. circo for everything else"""
-    import subprocess
+    assert sh.which(renderer) is not None, 'graphviz needs to be installed'
     file_type = os.path.splitext(out_image_file)[1][1:]
     tmp_name = create_temp_file("dependencies_visualization", "dot")
     with open(tmp_name, "w") as fh:
         print(dot_string, file=fh)
-    cmd = "%s -T%s \"%s\" -O" % (renderer, file_type, tmp_name)
+    size = "-Gsize=15" if file_type == "pdf" else ""
+    cmd = "%s -T%s %s \"%s\" -O" % (renderer, file_type, size, tmp_name)
     try:
         p = subprocess.Popen(cmd, shell=True)
         p.wait(1000)
@@ -102,26 +116,29 @@ def _escape_latex_general(s: str) -> str:
 def run_latex(tex: str, out_file: str, include_files: list = []) -> None:
     assert isinstance(include_files, list)
     from os.path import join
-    import subprocess
     d = create_temp_dir("latex", "dir")
     for f in include_files:
         b = os.path.basename(f)
         sh.copyfile(f, join(d, b))
     with open(join(d, "main.tex"), "w") as fh:
         print(tex, file=fh)
+    assert sh.which('latex') is not None, 'latex needs to be installed'
     ret_code = subprocess.Popen("latex main 1> log.std 2> log.err", shell=True, cwd=d).wait(1000)
     if ret_code != 0:
         raise Exception("LaTeX failed")
     ext = out_file.split(".")[-1]
     if ext == "pdf":
+        assert sh.which('dvipdfmx') is not None, 'dvipdfmx needs to be installed'
         ret_code = subprocess.Popen("dvipdfmx main.dvi 1> log.std 2> log.err", shell=True, cwd=d).wait(1000)
         if ret_code != 0:
             raise Exception("dvipdfmx failed")
     elif ext == "png":
+        assert sh.which('dvipng') is not None, 'dvipng needs to be installed'
         ret_code = subprocess.Popen("dvipng -D 500 main.dvi -o main.png 1> log.std 2> log.err", shell=True, cwd=d).wait(1000)
         if ret_code != 0:
             raise Exception("dvipng failed")
     elif ext == "jpg" or ext == "jpeg":
+        assert sh.which('convert') is not None, 'ImageMagick needs to be installed'
         ret_code = subprocess.Popen("convert -density 500,500 main.dvi -strip main." + ext, shell=True, cwd=d).wait(1000)
         if ret_code != 0:
             raise Exception("ImageMagick failed")
@@ -185,14 +202,13 @@ class SimpleNode:
         self.text_size = text_size
         self.position = position
 
-    def ipython(self):
+    def _repr_html_(self):
         graph_label = "ipython_tree"
         file_type = "svg"
         file = create_temp_file(graph_label, file_type)
         self.save(file)
-        with open(file, 'rb') as fh:
+        with open(file) as fh:
             x = fh.read()
-        x = x.decode()
         x = re.sub(r"<svg width=\".*?\" height=\".*?\"", "<svg width=\"100%\" height=\"100%\"", x)
         return x
 

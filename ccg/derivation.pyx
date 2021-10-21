@@ -9,7 +9,7 @@ import re
 
 from .combinators cimport *
 from .category cimport Category, Atomic, Functor
-from .universal_tree_visualization import create_temp_file
+from .universal_tree_visualization import create_temp_file, jupyter_download
 
 cdef list unary_normal = [
     TypeRaising(
@@ -53,29 +53,10 @@ cdef inline BinaryCombinator recognize_binary_comb(Category left, Category right
     return TypeChanging2(left=left, right=right, parent=parent)
 
 
-# noinspection PyPackageRequirements
 cdef class Node:
 
     def __cinit__(self):
         self._span_memo = None
-
-    def topological_grouping(self):
-        if self.is_term:
-            return [[self]]
-        elif self.is_unary:
-            return self.child.topological_grouping() + [[self]]
-        elif self.is_binary:
-            ltop = self.left.topological_grouping()
-            rtop = self.right.topological_grouping()
-            res = []
-            for i in range(min(len(ltop), len(rtop))):
-                res.append(ltop[i]+rtop[i])
-            mtop = ltop if len(ltop)>len(rtop) else rtop
-            res += mtop[len(res):]
-            res += [[self]]
-            return res
-        else:
-            raise Exception("I didn't expect this")
 
     def __iter__(self):
         return self.iter(postorder=False)
@@ -106,16 +87,8 @@ cdef class Node:
             return self._span_memo
 
     cpdef void assign_word_positions(self):
-        i = 0
-        queue = [self]
-        while queue:
-            n = queue.pop()
-            if n.is_term:
-                if n.pos < 0:
-                    n.pos = i
-                i+=1
-            else:
-                queue.extend(reversed(n.children))
+        for i, term in enumerate(self.iter_terminals()):
+            term.pos = i
 
     cpdef list words(self):
         return [n.word for n in self.iter_terminals()]
@@ -141,20 +114,20 @@ cdef class Node:
             yield self
 
     def _repr_html_(self):
-        from .visualization import CCG_dot_Visualize
-        return CCG_dot_Visualize.ipython(self)
+        self.display()
+        return ""
 
-    def print_latex(self):
-        from .visualization import LaTeX
-        print(LaTeX.to_latex(self))
+    def save(self, fn: str, vtype=None):
+        from .visualization import save
+        save(self, fn, vtype=vtype)
 
-    def save_proof(self, fn: str):
-        from .visualization import LaTeX
-        LaTeX.save_image(self, fn)
+    def visualize(self, vtype=None):
+        from .visualization import visualize
+        visualize(self, vtype)
 
-    def visualize_proof(self):
-        from .visualization import LaTeX
-        LaTeX.visualize(self)
+    def download(self, vtype=None):
+        from .visualization import jupyter_download
+        return jupyter_download(self, vtype=vtype)
 
     def _revealing_warning(self):
         if any(n.is_binary and n.comb.is_special_right_adj for n in self):
@@ -163,22 +136,9 @@ cdef class Node:
         else:
             return ""
 
-    def _show_image_with_title(self, img, title: str= None, warning: str= None):
-        from IPython.display import Image, display, HTML
-        display(HTML("<br/>"))
-        if title:
-            display(HTML(f"<b><font size=\"3\" color=\"red\">{title}</font></b>"))
-        if warning:
-            display(HTML(f"<font color=\"red\">WARNING: {warning}</font>"))
-        if isinstance(img, str):
-            display(Image(img))
-        else:
-            display(img)
-
-    def show_proof(self, title: str=None):
-        tmp_fn = create_temp_file("", "png")
-        self.save_proof(tmp_fn)
-        self._show_image_with_title(tmp_fn, title)
+    def display(self, vtype=None, title: str=None, warning=False):
+        from .visualization import jupyter_display
+        jupyter_display(self, vtype=vtype, title=title, warning=warning)
 
     def deps(self, lang="English", include_conj_term=False):
         from .predarg import PredArgAssigner
@@ -227,22 +187,22 @@ cdef class Node:
                                     title=title,
                                     warning=self._revealing_warning())
 
-    def visualize(self, name: str = "CCG derivation", file_type: str = "pdf"):
-        from .visualization import CCG_dot_Visualize
-        CCG_dot_Visualize.visualize(self, graph_label=name, file_type=file_type)
+    def __str__(self):
+        return self.to_ccgbank_str(with_indentation=False, comb_instead_of_cat=False)
 
-    def save_visual(self, fn: str):
-        from .visualization import CCG_dot_Visualize
-        CCG_dot_Visualize.save(self, fn)
+    def to_latex(self):
+        from .visualization import LaTeX
+        return LaTeX.to_latex(self)
 
-    def print_ascii(self, title=""):
+    def to_dot(self):
+        from .visualization import CCG_dot_Visualize
+        return CCG_dot_Visualize.to_dot(self)
+
+    def to_ascii_art(self, title=""):
         from .visualization import ASCII_Art
         if title:
             print(title)
-        print(ASCII_Art.deriv2ascii(self))
-
-    def __str__(self):
-        return self.to_ccgbank_str(with_indentation=False, comb_instead_of_cat=False)
+        return ASCII_Art.deriv2ascii(self)
 
     def to_ccgbank_str(self, depth: int = 0, with_indentation: bool = False, comb_instead_of_cat: bool = False):
         indentation = " "*depth*4 if with_indentation else ""
@@ -283,21 +243,15 @@ cdef class Node:
 
     def to_left_branching(self, is_extreme: bool = True):
         from .rotations import TreeTransducer
-        from .grammar import Grammar
-        transducer = TreeTransducer(is_extreme=is_extreme, g=Grammar())
-        return transducer.to_left_branching(self)
+        return TreeTransducer(is_extreme=is_extreme).to_left_branching(self)
 
     def to_left_branching_with_revealing(self, is_extreme: bool = True):
         from .rotations import TreeTransducer
-        from .grammar import Grammar
-        transducer = TreeTransducer(is_extreme=is_extreme, g=Grammar())
-        return transducer.to_left_branching_with_revealing(self)
+        return TreeTransducer(is_extreme=is_extreme).to_left_branching_with_revealing(self)
 
     def to_right_branching(self, is_extreme: bool = True):
         from .rotations import TreeTransducer
-        from .grammar import Grammar
-        transducer = TreeTransducer(is_extreme=is_extreme, g=Grammar())
-        return transducer.to_right_branching(self)
+        return TreeTransducer(is_extreme=is_extreme).to_right_branching(self)
 
 cdef class Terminal(Node):
 
