@@ -1,7 +1,7 @@
 
 from .combinators cimport *
 from .derivation cimport *
-from .category cimport Category
+from .categories cimport Category
 
 cdef class TreeTransducer:
 

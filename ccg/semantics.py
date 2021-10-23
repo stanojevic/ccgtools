@@ -2,7 +2,7 @@ from typing import Set, Dict, List
 import lark
 from .combinators import *
 from .derivation import *
-from .category import *
+from .categories import *
 from .visualization import escape_latex_text
 
 

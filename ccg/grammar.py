@@ -1,6 +1,6 @@
 
 from .combinators import *
-from .category import Category
+from .categories import Category
 
 
 class Grammar:

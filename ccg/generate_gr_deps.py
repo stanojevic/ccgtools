@@ -120,7 +120,7 @@ def generate_deps_standard(trees):
             arg_word, arg_index = arg.split("_")
             cat = _strip_markup(cat)
             if not _ignore(pred_word, cat, slot, arg_word, rule_id):
-                dep_link = DepLink(head_cat=ccg.cat(cat),
+                dep_link = DepLink(head_cat=ccg.category(cat),
                                    head_pos=int(pred_index)-1,
                                    dep_pos=int(arg_index)-1,
                                    dep_slot=int(slot),

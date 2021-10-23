@@ -27,7 +27,7 @@ class AStarSearch:
                  num_cpus : int = None,
                  use_normal_form : bool = True):
         assert ordered_cats != []
-        assert issubclass(type(ordered_cats[0]), ccg.category.Category)
+        assert issubclass(type(ordered_cats[0]), ccg.categories.Category)
         self.prune_beta = prune_beta
         self.prune_top_k_tags = prune_top_k_tags
         if num_cpus is None:
@@ -85,7 +85,7 @@ class LazyFuture:
 if __name__ == "__main__":
     import numpy as np
     print("start")
-    tags = [ccg.cat(x) for x in ["NP", r"S\NP/NP", "NP/N", "N"]]
+    tags = [ccg.category(x) for x in ["NP", r"S\NP/NP", "NP/N", "N"]]
     search = AStarSearch(tags)
     sents = ["John loves the apples".split()]
     b = len(sents)

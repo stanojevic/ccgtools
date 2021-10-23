@@ -1,7 +1,7 @@
 # cython: boundscheck=False
 
 import re
-from .category cimport Category, Functor, Atomic, ConjCat, matching, filter_substitution
+from .categories cimport Category, Functor, Atomic, ConjCat, matching, filter_substitution
 from .derivation cimport *
 
 

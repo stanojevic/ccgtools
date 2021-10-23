@@ -1,5 +1,5 @@
 
-from .category cimport Category
+from .categories cimport Category
 from .derivation cimport *
 
 

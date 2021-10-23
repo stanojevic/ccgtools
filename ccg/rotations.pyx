@@ -1,6 +1,6 @@
 # cython: boundscheck=False
 
-from .category cimport *
+from .categories cimport *
 from .derivation cimport *
 from .combinators cimport *
 

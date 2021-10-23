@@ -1,5 +1,5 @@
 from .combinators cimport *
-from .category cimport *
+from .categories cimport *
 from .derivation cimport *
 
 cdef class DepLink:

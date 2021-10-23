@@ -1,5 +1,5 @@
 from ccg.derivation import Node, DerivationLoader
-from ccg.category import Category
+from ccg.categories import Category
 from ccg import combinators as comb
 
 open = DerivationLoader.iter_from_file
@@ -12,12 +12,12 @@ def open_treebank_dir(dir_name):
 
 
 derivation = DerivationLoader.from_str
-cat = Category.from_str
+category = Category.from_str
 
 TypeChanging1 = comb.TypeChanging1  # class
 TypeRaising = comb.TypeRaising  # class
-tr_np_fwd = TypeRaising(cat_res=cat("S"), cat_arg=cat("NP"), is_forward=True)
-tr_np_bck = TypeRaising(cat_res=cat("S\\NP"), cat_arg=cat("NP"), is_forward=False)
+tr_np_fwd = TypeRaising(cat_res=category("S"), cat_arg=category("NP"), is_forward=True)
+tr_np_bck = TypeRaising(cat_res=category("S\\NP"), cat_arg=category("NP"), is_forward=False)
 
 TypeChanging2 = comb.TypeChanging2  # class
 RightAdjoin = comb.RightAdjoin  # class

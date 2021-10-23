@@ -8,7 +8,7 @@ import itertools
 import re
 
 from .combinators cimport *
-from .category cimport Category, Atomic, Functor
+from .categories cimport Category, Atomic, Functor
 from .universal_tree_visualization import create_temp_file
 
 cdef list unary_normal = [

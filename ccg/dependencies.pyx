@@ -2,7 +2,7 @@
 
 from .visualization import DepsDesc
 from .combinators cimport *
-from .category cimport *
+from .categories cimport *
 from .derivation cimport *
 
 cdef dict _MEMO_ENGLISH_PRED_ARG_MAP = None
