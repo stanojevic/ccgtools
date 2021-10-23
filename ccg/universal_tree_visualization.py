@@ -16,7 +16,7 @@ def jupyter_download_link(save_func, tmp_dir="./tmp", name_prefix='tree', fmt="p
     os.makedirs(tmp_dir, exist_ok=True)
     if os.path.exists(fn):
         # try with another random file name
-        jupyter_download(save_func, tmp_dir, name_prefix, fmt)
+        jupyter_download_link(save_func, tmp_dir, name_prefix, fmt)
     try:
         from google.colab import files
         save_func(fn)

@@ -9,6 +9,7 @@ optuna_models/
 .ipynb_checkpoints/
 models/
 fasttext_embs/
+*.o
 
 ccg/representation/category.c
 ccg/representation/category.cpp

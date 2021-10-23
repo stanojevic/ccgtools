@@ -11,7 +11,8 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar destfile="../ccg-astar-search.jar" basedir="bin"/>
+        <jar destfile="../astar.jar" basedir="bin"/>
+        <delete dir="bin"/>
     </target>
 
 </project>

@@ -193,7 +193,7 @@ class Term:
         res += "\\end{document}\n"
         return res
 
-    def show(self, title: str = None, warning: str = None):
+    def display(self, title: str = None, warning: str = None):
         from IPython.display import Image, display, HTML
         from .universal_tree_visualization import create_temp_file
         tmp_fn = create_temp_file("", "png")

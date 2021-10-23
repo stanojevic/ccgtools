@@ -22,6 +22,7 @@ def jupyter_display(tree, vtype=None, title=None, warning=False):
         _jupyter_display_object_with_title(CCG_dot_Visualize._to_simple_node(tree),
                                            title=title, warning=warning)
 
+
 def _jupyter_display_object_with_title(obj, title=None, warning=False):
     from IPython.display import display, HTML
     display(HTML("<br/>"))
@@ -36,10 +37,10 @@ def jupyter_download(tree, vtype=None):
     return jupyter_download_link(lambda fn: save(tree=tree, fn=fn, vtype=vtype), name_prefix="tree")
 
 
-def visualize(tree, vtype=None):
-    fn = create_temp_file(graph_label, file_type)
+def visualize(tree, graph_label="", vtype=None):
+    fn = create_temp_file(graph_label, "pdf")
     save(tree, fn=fn, vtype=vtype)
-    open_default(file)
+    open_default(fn)
 
 
 def save(tree, fn, vtype=None):
@@ -150,7 +151,43 @@ class CCG_dot_Visualize:
         return simple.to_dot()
 
 
+class CCGDepsDesc:
+
+    def __init__(self, words, deps, leftmost_index=0):
+        self.words = words
+        self.deps = deps
+        self.leftmost_index = leftmost_index
+
+    def __iter__(self):
+        for d in self.deps:
+            yield d
+
+    def add(self, dep):
+        self.deps.add(dep)
+
+    def _repr_html_(self):
+        return self._construct_general_deps_desc()._repr_html_()
+
+    def _construct_general_deps_desc(self):
+        deps_list = [(d.head_pos, d.dep_pos, d.label, "dashed" if d.is_adj else "solid") for d in self.deps]
+        return DepsDesc(words=self.words, deps=deps_list, starting_position=self.leftmost_index)
+
+    def display(self, title: str = None, warning=False):
+        _jupyter_display_object_with_title(self._construct_general_deps_desc(), title=title, warning=warning)
+
+    def save(self, fn: str):
+        self._construct_general_deps_desc().save(fn)
+
+    def visualize(self, graph_label="ccg dependencies"):
+        self._construct_general_deps_desc().visualize(graph_label)
+
+    def download(self):
+        from .visualization import jupyter_download
+        return jupyter_download_link(self._construct_general_deps_desc().save, name_prefix="ccg_deps")
+
+
 class DepsDesc:
+    """This is a very general class for representing dependencies that are not necessarily coming out of CCG"""
 
     def __init__(self, words: List[str], deps: List[Tuple[int, int, str, str]], starting_position: int):
         self.starting_position = starting_position
@@ -205,14 +242,14 @@ class DepsDesc:
     def save(self,
              fn: str,
              renderer: str = "dot",
-             include_disconnected_words: bool = True,
+             include_disconnected_words: bool = False,
              include_word_positions: bool = False) -> None:
         run_graphviz(dot_string=self.to_dot(include_disconnected_words=include_disconnected_words,
                                             include_word_positions=include_word_positions),
                      out_image_file=fn,
                      renderer=renderer)
 
-    def to_dot(self, include_disconnected_words: bool = True, include_word_positions: bool = False):
+    def to_dot(self, include_disconnected_words: bool = False, include_word_positions: bool = False):
         deps = self.deps
         words = enumerate(self.words, self.starting_position)
         if not include_disconnected_words:
@@ -325,7 +362,9 @@ class LaTeX:
         res += "\\documentclass{standalone}\n"
         res += "\\usepackage{xcolor}  % this is for coloring logical formulas\n"
         res += "\\usepackage{mathptmx}  % this is for nicer looking lambdas\n"
+        res += "\\usepackage{amsmath}  % this is for \\operatorname\n"
         res += "\\usepackage{ccg}  % you can find the necessary style file ccg.sty in the repository of the parser\n"
+        res += "% currently available at https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/ccg.sty"
         res += "\\usepackage{amsmath}\n"
         res += "\\begin{document}\n"
         res += "\\deriv{%d}{\n\t%s\n}\n" % (len(terms), "\\\\\n\t".join(out))

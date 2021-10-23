@@ -2,14 +2,22 @@ from ccg.derivation import Node, DerivationLoader
 from ccg.category import Category
 from ccg import combinators as comb
 
-derivs_from_file = DerivationLoader.iter_from_file
-deriv_from_str = DerivationLoader.from_str
-cat_from_str = Category.from_str
+open = DerivationLoader.iter_from_file
+
+
+def open_treebank_dir(dir_name):
+    dl = DerivationLoader
+    fs = dl.iter_from_treebank_train, dl.iter_from_treebank_dev, dl.iter_from_treebank_test, dl.iter_from_treebank_rest
+    return tuple(f(dir_name) for f in fs)
+
+
+derivation = DerivationLoader.from_str
+cat = Category.from_str
 
 TypeChanging1 = comb.TypeChanging1  # class
 TypeRaising = comb.TypeRaising  # class
-tr_np_fwd = TypeRaising(cat_res=cat_from_str("S"), cat_arg=cat_from_str("NP"), is_forward=True)
-tr_np_bck = TypeRaising(cat_res=cat_from_str("S\\NP"), cat_arg=cat_from_str("NP"), is_forward=False)
+tr_np_fwd = TypeRaising(cat_res=cat("S"), cat_arg=cat("NP"), is_forward=True)
+tr_np_bck = TypeRaising(cat_res=cat("S\\NP"), cat_arg=cat("NP"), is_forward=False)
 
 TypeChanging2 = comb.TypeChanging2  # class
 RightAdjoin = comb.RightAdjoin  # class
@@ -39,3 +47,25 @@ bapply = b0b
 fcomp = b1f
 fxcomp = bx1f
 
+
+def _main_split():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--treebank-dir", required=True)
+    parser.add_argument("--output-dir"  , required=True)
+    args = parser.parse_args()
+
+    train, dev, test, rest = open_treebank_dir(args.treebank_dir)
+    for s, trees in [('train', train), ('dev', dev), ('test', test), ('rest', rest)]:
+        print(f"processing {s}")
+        fn_ccg = path.join(args.output_dir, s + ".auto")
+        fn_stag = path.join(args.output_dir, s + ".stags")
+        fn_words = path.join(args.output_dir, s + ".words")
+        assert not path.exists(fn_ccg), f"file {fn_ccg} must be removed before proceeding"
+        with open(fn_ccg, "w") as fh_ccg, \
+             open(fn_stag, "w") as fh_stag, \
+             open(fn_words, "w") as fh_words:
+            for tree in trees:
+                print(tree.to_ccgbank_str(), file=fh_ccg)
+                print(" ".join(map(str, tree.stags())), file=fh_stag)
+                print(" ".join(tree.words()), file=fh_words)

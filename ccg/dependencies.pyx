@@ -90,7 +90,7 @@ cdef inline dict _english_predarg_table():
         from os.path import realpath, dirname, join
         from os import getcwd
         res = dict()
-        file_loc = join(realpath(join(getcwd(), dirname(__file__))), "predarg_mapping_english.txt")
+        file_loc = join(realpath(join(getcwd(), dirname(__file__))), "dependencies_mapping_english.txt")
         with open(file_loc) as fh:
             for line in fh:
                 if line.startswith("#"):
@@ -1100,20 +1100,12 @@ cdef class DepLink:
         self.is_unbound = is_unbound
         self.is_adj = is_adj
         self.is_conj = is_conj
-        # self._hash = hash(self.__reduce__())
         self._hash = hash((self.head_cat,
                            self.head_pos,
                            self.dep_pos,
                            self.dep_slot,
                            self.head_word,
-                           self.dep_word,
-                           self.is_bound,
-                           self.is_unbound,
-                           self.is_adj,
-                           self.is_conj))
-
-    def to_unlabelled(self):
-        return self.head_pos, self.dep_pos
+                           self.dep_word))
 
     cpdef tuple __reduce__(self):
         return (self.head_cat,

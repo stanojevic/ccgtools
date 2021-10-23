@@ -1,4 +1,3 @@
-from .predarg import PredArgAssigner, DepLink
 from collections import Counter
 
 
@@ -26,46 +25,37 @@ def prf_score_from_stats(overlap: int, gold_count: int, pred_count: int):
 
 
 def overlap(xs, ys):
-    return sum((Counter(x) & Counter(y)).values())
+    return sum((Counter(xs) & Counter(ys)).values())
 
 
-def _to_stag(d : DepLink):
-    return d.head_cat
-
-def _to_directed_labelled_dep(d : DepLink):
-    return d.head_cat, d.dep_slot, d.head_pos, d.dep_pos
-
-
-def _to_undirected_unlabelled_dep(d : DepLink):
-    return min(d.head_pos, d.dep_pos), max(d.head_pos, d.dep_pos)
-
-
-def sufficient_stats(gold_tree, pred_tree, language):
+def sufficient_stats_from_deps(gold_deps, pred_deps):
     stats = dict()
-
-    predarg_assigner = PredArgAssigner(language, include_conj_term=False)
-
-    gold_deps = predarg_assigner.all_deps(gold_tree)
-    pred_deps = predarg_assigner.all_deps(pred_tree)
-
     for name, fun in METRICS:
         gold = [fun(d) for d in gold_deps]
         pred = [fun(d) for d in pred_deps]
         stats[f"{name}_overlap"] = overlap(gold, pred)
         stats[f"{name}_gold_count"] = len(gold)
         stats[f"{name}_pred_count"] = len(pred)
-
     return stats
 
 
+def sufficient_stats(gold_tree, pred_tree, language):
+    return sufficient_stats_from_deps(
+        gold_deps=gold_tree.deps(lang=language),
+        pred_deps=pred_tree.deps(lang=language)
+    )
+
+
 METRICS = {
-    "labelled_dep" : _to_directed_labelled_dep,
-    "undirected_unlabelled_dep": _to_undirected_unlabelled_dep,
-    "stag": _to_stag
+    ("labeled_dep" , lambda d: (d.head_cat, d.dep_slot, d.head_pos, d.dep_pos)),
+    ("undirected_unlabeled_dep", lambda d: (min(d.head_pos, d.dep_pos), max(d.head_pos, d.dep_pos))),
+    ("unlabeled_dep", lambda d: (d.head_pos, d.dep_pos)),
+    ("stag", lambda d: d.head_cat)
 }
 
 
 def combine_stats(stats):
+    stats = list(stats)
     all_scores = dict()
     for name, fun in METRICS:
         overlap = sum(x[f"{name}_overlap"] for x in stats)
@@ -76,3 +66,62 @@ def combine_stats(stats):
         all_scores[f"{name}_R"] = r
         all_scores[f"{name}_F"] = f
     return all_scores
+
+
+def evaluate(gold_trees, pred_trees):
+    gold_deps = [x.deps() for x in gold_trees]
+    pred_deps = [x.deps() for x in pred_trees]
+    assert len(gold_deps) == len(pred_deps), "the number of trees differ"
+    return combine_stats(sufficient_stats_from_deps(g, p) for g, p in zip(gold_deps, pred_deps) if g and p)
+
+
+def _main_evaluate():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--gold", required=True)
+    parser.add_argument("--pred", required=True)
+    parser.add_argument("--include-generate", dest='include_generate', default=False, action='store_true')
+    args = parser.parse_args()
+    import ccg
+
+    gold_trees = list(ccg.open(args.gold))
+    pred_trees = list(ccg.open(args.pred))
+
+    result = evaluate(gold_trees, pred_trees)
+
+    def num_to_str(res, name, metric):
+        decimals = 1
+        return str(round(res[f"{name}_{metric}"], decimals))
+
+    table = []
+    for orig_name, new_name in [('labeled_dep', "deps labeled"),
+                                ('unlabeled_dep', "deps unlabeled"),
+                                ('undirected_unlabeled_dep', "deps unlabeled undirected"),
+                                ('stag', "super-tagging")]:
+        table.append({
+            'P' : num_to_str(result, orig_name, "P"),
+            'R' : num_to_str(result, orig_name, "R"),
+            'F' : num_to_str(result, orig_name, "F"),
+            'eval' : new_name
+        })
+        if orig_name == "stag":
+            table[-1]["F"] = ""
+            table[-1]["R"] = ""
+
+    if args.include_generate:
+        from ccg.generate_gr_deps import evaluate as evaluate_generate
+        gen_result = evaluate_generate(gold_trees, pred_trees)
+        for orig_name, new_name in [('labeled_dep', "generate labeled"),
+                                    ('unlabeled_dep', "generate unlabeled")]:
+            table.append({
+                'P': num_to_str(gen_result, orig_name, "P"),
+                'R': num_to_str(gen_result, orig_name, "R"),
+                'F': num_to_str(gen_result, orig_name, "F"),
+                'eval' : new_name
+            })
+
+    headers = ["eval", "P", "R", "F"]
+    table = [[entry[h] for h in headers] for entry in table]
+
+    import tabulate
+    print(tabulate.tabulate(table, headers=headers, tablefmt="fancy_grid", disable_numparse=True))

@@ -9,7 +9,7 @@ import re
 
 from .combinators cimport *
 from .category cimport Category, Atomic, Functor
-from .universal_tree_visualization import create_temp_file, jupyter_download
+from .universal_tree_visualization import create_temp_file
 
 cdef list unary_normal = [
     TypeRaising(
@@ -121,71 +121,39 @@ cdef class Node:
         from .visualization import save
         save(self, fn, vtype=vtype)
 
-    def visualize(self, vtype=None):
+    def visualize(self, graph_label="ccg", vtype=None):
         from .visualization import visualize
-        visualize(self, vtype)
+        visualize(self, graph_label=graph_label, vtype=vtype)
 
     def download(self, vtype=None):
         from .visualization import jupyter_download
         return jupyter_download(self, vtype=vtype)
 
-    def _revealing_warning(self):
-        if any(n.is_binary and n.comb.is_special_right_adj for n in self):
-            return "this tree contains revealing nodes so the dependencies shown bellow "+ \
-                   "are only an approximation of what happens when revealing is used."
-        else:
-            return ""
-
     def display(self, vtype=None, title: str=None, warning=False):
         from .visualization import jupyter_display
-        jupyter_display(self, vtype=vtype, title=title, warning=warning)
+        tree = self
+        if any(n.is_binary and n.comb.is_special_right_adj for n in tree):
+            tree.to_left_branching()
+        jupyter_display(tree, vtype=vtype, title=title, warning=warning)
 
     def deps(self, lang="English", include_conj_term=False):
-        from .predarg import PredArgAssigner
+        from .dependencies import PredArgAssigner
         pa = PredArgAssigner(lang=lang, include_conj_term=include_conj_term)
-        return pa.all_deps(self)
+        deps = pa.all_deps(self)
+        from .visualization import CCGDepsDesc
+        return CCGDepsDesc(self.words(), deps, self.span[0])
 
-    def save_deps(self, fn:str, lang="English", include_conj_term=False):
-        from .predarg import PredArgAssigner
-        pa = PredArgAssigner(lang=lang, include_conj_term=include_conj_term)
-        pa.all_deps_save(self, fn=fn)
+    def with_semantics(self, lang="English"):
+        from ccg.semantics import SemanticsAssigner
+        sem_assigner = SemanticsAssigner("English")
+        return sem_assigner.assign_semantics(self)
 
-    def show_deps(self, title=None, lang="English", include_conj_term=False):
-        from .predarg import PredArgAssigner
-        pa = PredArgAssigner(lang=lang, include_conj_term=include_conj_term)
-        self._show_image_with_title(pa.show_all_deps(self),
-                                    title=title,
-                                    warning=self._revealing_warning())
+    def all_readings(self, lang="English"):
+        return self.with_semantics(self).semantics.unpack_all_readings()
 
-    def visualize_deps(self, lang="English", include_conj_term=False):
-        from .predarg import PredArgAssigner
-        pa = PredArgAssigner(lang=lang, include_conj_term=include_conj_term)
-        pa.show_all_deps(self).visualize()
-
-    def save_gr_deps_conventional(self, fn: str):
-        from .gr_deps import tree_to_simple_DepsDesc
-        deps_desc = tree_to_simple_DepsDesc(self)
-        deps_desc.save_simple_deps_image(fn)
-
-    def show_gr_deps_conventional(self, title: str=None):
-        from .gr_deps import tree_to_simple_DepsDesc
-        tmp_fn = create_temp_file("gr_deps", "png")
-        tree_to_simple_DepsDesc(self).save_simple_deps_image(tmp_fn)
-        self._show_image_with_title(tmp_fn, title)
-
-    def save_gr_deps(self, fn: str, lang="English"):
-        from .gr_deps import tree_to_simple_DepsDesc
-        deps_desc = tree_to_simple_DepsDesc(self)
-        deps_desc.show_unconnected_words = False
-        deps_desc.save(fn)
-
-    def show_gr_deps(self, title=None, lang="English"):
-        from .gr_deps import tree_to_simple_DepsDesc
-        deps_desc = tree_to_simple_DepsDesc(self)
-        deps_desc.show_unconnected_words = False
-        self._show_image_with_title(deps_desc,
-                                    title=title,
-                                    warning=self._revealing_warning())
+    def display_all_readings(self, lang="English"):
+        for reading in self.all_readings():
+            reading.display()
 
     def __str__(self):
         return self.to_ccgbank_str(with_indentation=False, comb_instead_of_cat=False)
