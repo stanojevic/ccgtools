@@ -11,7 +11,6 @@ from pprint import pprint
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
-from pytorch_lightning.loggers import TensorBoardLogger
 
 from optuna import Trial
 from optuna.integration import PyTorchLightningPruningCallback
@@ -150,15 +149,19 @@ class Model(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = optimizer_class_by_name(self.optimizer)(self.parameters(), lr=self.lr)
-        max_epochs = 20
-        steps_per_epoch = 2*40_000 // self.batch_size
 
-        # very nice desc of schedulers https://www.kaggle.com/isbhargav/guide-to-pytorch-learning-rate-scheduling
-        scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=self.lr/100, max_lr=self.lr,
-                                                      step_size_up=2*steps_per_epoch,
-                                                      step_size_down=7*steps_per_epoch,
-                                                      mode="exp_range", gamma=0.85, cycle_momentum=False)
-        return {"optimizer": optimizer, "lr_scheduler" : {"scheduler" : scheduler, "interval" : "step"}}
+        from ccg.supertagger.embedders import TransformersEmbedder
+        if type(self.embedder) == TransformersEmbedder:
+            max_epochs = 20
+            steps_per_epoch = 2 * 40_000 // self.batch_size
+            # very nice desc of schedulers https://www.kaggle.com/isbhargav/guide-to-pytorch-learning-rate-scheduling
+            scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=self.lr/10, max_lr=self.lr,
+                                                          step_size_up=2*steps_per_epoch,
+                                                          step_size_down=7*steps_per_epoch,
+                                                          mode="exp_range", gamma=0.85, cycle_momentum=False)
+            return {"optimizer": optimizer, "lr_scheduler" : {"scheduler" : scheduler, "interval" : "step"}}
+        else:
+            return optimizer
 
     def collate(self, batch_raw):
         tok_name = self.embedder.model_name
@@ -239,6 +242,7 @@ def objective(trial: Trial,
               max_epochs,
               language,
               seed=None,
+              use_tensorboard=False,
               optuna=False):
     print("PROCESS ID: {}".format(os.getpid()), file=stderr)
     print("TIME START : " + time.strftime('%l:%M%p on %d %b %Y'), file=stderr)
@@ -273,10 +277,14 @@ def objective(trial: Trial,
         early_stop_callback = PyTorchLightningPruningCallback(trial, monitor=metric_to_monitor)
         save_top_k = 0
     else:
-        logger = TensorBoardLogger(
-            save_dir=save_dir,
-            name=model_name
-        )
+        if use_tensorboard:
+            from pytorch_lightning.loggers import TensorBoardLogger
+            logger = TensorBoardLogger(
+                save_dir=save_dir,
+                name=model_name
+            )
+        else:
+            logger = True
         early_stop_callback = EarlyStopping(
             monitor=metric_to_monitor,
             min_delta=0.00,
