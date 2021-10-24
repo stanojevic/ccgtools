@@ -138,7 +138,7 @@ class Model(pl.LightningModule):
             metric_stats = [x for xs in outputs for x in xs[3]]
             metrics = combine_stats(metric_stats)
             self.log("lf", metrics["labeled_dep_F"], prog_bar=True)
-            self.log("uf", metrics["undirected_unlabeled_dep_F"], prog_bar=True)
+            self.log("uf", metrics["unlabeled_dep_F"], prog_bar=True)
 
             is_incomplete = sum(x[4] for x in outputs)
             sents_count = len(metric_stats)
