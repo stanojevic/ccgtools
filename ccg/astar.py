@@ -11,7 +11,6 @@ if not jp.isJVMStarted():
     EASYCCG_JAR = join(realpath(join(getcwd(), dirname(__file__))), "astar.jar")
     jp.startJVM(convertStrings=True, classpath=[EASYCCG_JAR])
 
-MainSearch = jp.JPackage("astar").MainSearch
 ArrayList = jp.JPackage("java").util.ArrayList
 
 
@@ -27,13 +26,12 @@ class AStarSearch:
                  num_cpus : int = None,
                  use_normal_form : bool = True):
         assert ordered_cats != []
-        assert issubclass(type(ordered_cats[0]), ccg.categories.Category)
         self.prune_beta = prune_beta
         self.prune_top_k_tags = prune_top_k_tags
         if num_cpus is None:
             num_cpus = 0
-        self.astar = MainSearch(
-            ArrayList([str(x) for x in ordered_cats]),
+        self.astar = jp.JPackage("astar").MainSearch(
+            ArrayList([str(ccg.category(str(x))) for x in ordered_cats]),
             max_steps,
             num_cpus,
             unary_prob,

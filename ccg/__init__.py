@@ -1,6 +1,18 @@
 from ccg.derivation import Node, DerivationLoader
 from ccg.categories import Category
 from ccg import combinators as comb
+import jieba
+from ccg.penn_treebank_tokenizer import penn_tokenize
+
+
+def tokenize(sent, language):
+    if language in ["Chinese", "zh"]:
+        return jieba.cut(sent, cut_all=False)
+    elif language in ["English", "en"]:
+        return penn_tokenize(sent, convert_parentheses=False)
+    else:
+        raise Exception(f"unsupported tokenization for {language} language")
+
 
 open = DerivationLoader.iter_from_file
 

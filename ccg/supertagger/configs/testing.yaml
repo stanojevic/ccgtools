@@ -1,0 +1,15 @@
+gradient clip : False
+batch size : 1
+
+embedder type : normal
+embedder dim : 128
+embedder fasttext lang : none
+
+optimizer : Adam
+lr : 0.01
+
+mlp hid dim : 128
+lstm layers : 0
+lstm dropout : 0.
+
+use span logprobs : True

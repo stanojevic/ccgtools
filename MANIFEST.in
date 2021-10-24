@@ -1,4 +1,5 @@
 include ccg/*.txt
 include ccg/*.jar
 include ccg/*.sty
+include ccg/supertagger/configs/*.yaml
 exclude ccg/astar_search

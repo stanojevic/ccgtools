@@ -136,7 +136,12 @@ cdef class Node:
             tree.to_left_branching()
         jupyter_display(tree, vtype=vtype, title=title, warning=warning)
 
-    def deps(self, lang="English", include_conj_term=False):
+    def deps(self, lang=None, include_conj_term=False):
+        if lang is None:
+            if hasattr(self, 'language'):
+                lang = getattr(self, 'language')
+            else:
+                lang = "English"
         from .dependencies import PredArgAssigner
         pa = PredArgAssigner(lang=lang, include_conj_term=include_conj_term)
         deps = pa.all_deps(self)

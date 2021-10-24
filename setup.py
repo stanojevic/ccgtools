@@ -8,6 +8,9 @@ extensions = cythonize("ccg/**/*.pyx", language_level=3)
 with open('requirements.txt') as fh:
     install_requires = [x.strip() for x in fh]
 
+with open('requirements-parser.txt') as fh:
+    install_requires_parser = [x.strip() for x in fh]
+
 with open('README.md', encoding='utf-8') as fh:
     long_description = fh.read()
 
@@ -22,14 +25,18 @@ setup(
     url="https://github.com/stanojevic/ccgtools",
     license='MIT License',
     packages=find_packages(),
-    package_data={'': glob("ccg/*.txt")+glob("ccg/*.jar")+glob("ccg/*.sty")},
+    package_data={'': glob("ccg/*.txt")+glob("ccg/*.jar")+glob("ccg/*.sty")+glob("ccg/supertagger/configs/*.yaml")},
     include_package_data=True,
     install_requires=install_requires,
+    extras_require={"parser": install_requires_parser},
     zip_safe=False,
     entry_points={
         'console_scripts': [
             'ccg-split = ccg:_main_split',
             'ccg-eval = ccg.evaluation:_main_evaluate',
+            'ccg-parser = ccg.supertagger.main:parse',
+            'ccg-supertagger = ccg.supertagger.main:supertagger',
+            'ccg-train = ccg.supertagger.main:train',
         ]
     },
     classifiers=[

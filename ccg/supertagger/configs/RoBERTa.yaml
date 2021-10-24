@@ -1,0 +1,14 @@
+gradient clip : True
+batch size : 128
+
+embedder type : roberta-base
+
+optimizer : Adam
+lr : 0.00005
+
+mlp hid dim : 128
+lstm layers : 0
+
+lstm dropout : 0.0
+
+use span logprobs : True

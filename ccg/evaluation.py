@@ -39,7 +39,7 @@ def sufficient_stats_from_deps(gold_deps, pred_deps):
     return stats
 
 
-def sufficient_stats(gold_tree, pred_tree, language):
+def sufficient_stats(gold_tree, pred_tree, language="English"):
     return sufficient_stats_from_deps(
         gold_deps=gold_tree.deps(lang=language),
         pred_deps=pred_tree.deps(lang=language)
@@ -68,9 +68,9 @@ def combine_stats(stats):
     return all_scores
 
 
-def evaluate(gold_trees, pred_trees):
-    gold_deps = [x.deps() for x in gold_trees]
-    pred_deps = [x.deps() for x in pred_trees]
+def evaluate(gold_trees, pred_trees, language):
+    gold_deps = [x.deps(lang=language) for x in gold_trees]
+    pred_deps = [x.deps(lang=language) for x in pred_trees]
     assert len(gold_deps) == len(pred_deps), "the number of trees differ"
     return combine_stats(sufficient_stats_from_deps(g, p) for g, p in zip(gold_deps, pred_deps) if g and p)
 
@@ -80,6 +80,7 @@ def _main_evaluate():
     parser = argparse.ArgumentParser()
     parser.add_argument("--gold", required=True)
     parser.add_argument("--pred", required=True)
+    parser.add_argument("--lang", default="English")
     parser.add_argument("--include-generate", dest='include_generate', default=False, action='store_true')
     args = parser.parse_args()
     import ccg
@@ -87,7 +88,7 @@ def _main_evaluate():
     gold_trees = list(ccg.open(args.gold))
     pred_trees = list(ccg.open(args.pred))
 
-    result = evaluate(gold_trees, pred_trees)
+    result = evaluate(gold_trees, pred_trees, args.lang)
 
     def num_to_str(res, name, metric):
         decimals = 1
