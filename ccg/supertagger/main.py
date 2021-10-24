@@ -3,9 +3,9 @@ import yaml
 from os.path import join, basename
 
 
-def _load_and_setup_model(model_name, gpu_id):
+def _load_and_setup_model(model_name, gpu_id, num_cpus):
     from ccg.supertagger.parser import Parser
-    parser = Parser(model_name)
+    parser = Parser(model_name, num_cpus=num_cpus)
     parser.to(gpu_id)
     return parser
 
@@ -16,9 +16,10 @@ def supertagger():
     arg_parser.add_argument("--input-text-fn"              , required=True)
     arg_parser.add_argument("--output-tags-fn"             , required=True)
     arg_parser.add_argument("--multitaggin-top-k", type=int, default=0    )
-    arg_parser.add_argument("--gpu_id",            type=int, default=None )
+    arg_parser.add_argument("--gpu-id",            type=int, default=None )
+    arg_parser.add_argument("--num-cpus",          type=int, default=0    )
     args = arg_parser.parse_args()
-    parser = _load_and_setup_model(args.model, args.gpu_id)
+    parser = _load_and_setup_model(args.model, args.gpu_id, args.num_cpus)
     with open(args.input_text_fn) as fh_in, \
             open(args.output_tags_fn, "w") as fh_out:
         raise NotImplementedError()
@@ -48,7 +49,7 @@ def parse():
     arg_parser.add_argument("--num-cpus",     type=int, default=None       )
     args = arg_parser.parse_args()
 
-    parser = _load_and_setup_model(args.model, args.gpu_id)
+    parser = _load_and_setup_model(args.model, args.gpu_id, args.num_cpus)
     with open(args.input_text_fn) as fh_in, \
          open(args.output_trees_fn, "w") as fh_out:
         for tree in parser.parse_iter(fh_in):

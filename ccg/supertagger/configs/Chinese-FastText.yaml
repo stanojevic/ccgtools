@@ -1,7 +1,7 @@
 gradient clip : False
 batch size : 128
 
-embedder type : normal
+embedder type : fixed-fasttext
 embedder dim : 300
 embedder fasttext lang: zh
 
