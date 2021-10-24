@@ -5,6 +5,7 @@ import jpype as jp
 from jpype.types import *
 from os.path import realpath, dirname, join
 from os import getcwd
+import atexit
 
 if not jp.isJVMStarted():
 
@@ -38,6 +39,7 @@ class AStarSearch:
             puncconj_prob,
             use_normal_form
         )
+        atexit.register(self.astar.shutdown)
 
     def parse_batch(self, sents, batch_tag_logprobs, batch_span_logprobs=None):
         """

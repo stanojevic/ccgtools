@@ -85,6 +85,12 @@ public class MainSearch {
                 useNormalForm);
     }
 
+    public void shutdown(){
+        this.service.shutdown();
+        this.service = null;
+        java.util.concurrent.ForkJoinPool.commonPool().shutdown();
+    }
+
     public Future<List<String>> searchBatchFuture(List<List<String>> words,
                                                   long[][][] tagIndices,
                                                   double[][][] tagScores,

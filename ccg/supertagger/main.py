@@ -54,7 +54,6 @@ def parse():
          open(args.output_trees_fn, "w") as fh_out:
         for tree in parser.parse_iter(fh_in):
             print(tree.to_ccgbank_str(), file=fh_out)
-            print(stags)
 
 
 def train():
