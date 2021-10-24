@@ -27,10 +27,11 @@ class Parser:
                 model_file = os.path.join(PRETRAINED_MODELS_DIR, model_name)
                 if not os.path.isfile(model_file):
                     import gdown
-                    link_to_list = r"https://drive.google.com/uc?id=1-ygG-NlXB36w4AFVZLujDWEE0iTOCjkJ"
+                    link_to_list = r"https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/supertagger/configs/pretrained_models_locations.tsv"
                     os.makedirs(PRETRAINED_MODELS_DIR, exist_ok=True)
                     list_file = os.path.join(PRETRAINED_MODELS_DIR, "available_models_links.tsv")
-                    os.unlink(list_file)
+                    if os.path.isfile(list_file):
+                        os.unlink(list_file)
                     gdown.download(link_to_list, list_file)
                     with open(list_file) as fh:
                         pretrained_links = dict(x.split("\t") for x in fh.readlines())
