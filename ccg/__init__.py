@@ -7,6 +7,8 @@ from ccg.penn_treebank_tokenizer import penn_tokenize
 
 def tokenize(sent, language):
     if language in ["Chinese", "zh"]:
+        if type(sent) == list:
+            sent = " ".join(sent)
         return jieba.cut(sent, cut_all=False)
     elif language in ["English", "en"]:
         return penn_tokenize(sent, convert_parentheses=False)

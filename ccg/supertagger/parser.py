@@ -95,7 +95,7 @@ class Parser:
         curr_batch_max_sent_len = 0
         for sent in sent_iter:
             if type(sent) == str:
-                sent = x.strip().split()
+                sent = sent.strip().split()
             if self.do_tokenization:
                 sent = ccg.tokenize(sent, self.model.language)
             curr_batch.append(sent)
