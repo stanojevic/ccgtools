@@ -237,6 +237,7 @@ def objective(trial: Trial,
               gpus,
               min_epochs,
               max_epochs,
+              language,
               seed=None,
               optuna=False):
     print("PROCESS ID: {}".format(os.getpid()), file=stderr)
@@ -251,7 +252,7 @@ def objective(trial: Trial,
     model_name = "model"
     metric_to_monitor = "accuracy"
 
-    model = Model(trial, w2i, stag2i, batch_size=batch_size)
+    model = Model(trial, w2i, stag2i, batch_size=batch_size, language=language)
 
     train_sent_lens = [len(x['words']) for x in train_dataset]
     dev_sent_lens = [len(x['words']) for x in dev_dataset]
