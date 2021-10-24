@@ -112,7 +112,7 @@ class Model(pl.LightningModule):
         predictions = tag_logprobs.argmax(-1)  # (b, l)
         corrects = (predictions.detach() == batch['stag_ids']).masked_fill(~batch['word_mask'], False).sum().item()
         word_count = batch['word_mask'].sum().item()
-        sents_count = batch['words_mask'].shape[0]
+        sents_count = batch['word_mask'].shape[0]
         if hasattr(self, 'is_parsing_ready') and self.is_parsing_ready:
             tic = time.time()
             pred_trees = list(self.parser.parse_iter(batch['words']))
