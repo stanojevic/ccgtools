@@ -112,6 +112,7 @@ class Model(pl.LightningModule):
         predictions = tag_logprobs.argmax(-1)  # (b, l)
         corrects = (predictions.detach() == batch['stag_ids']).masked_fill(~batch['word_mask'], False).sum().item()
         word_count = batch['word_mask'].sum().item()
+        sents_count = batch['words_mask'].shape[0]
         if hasattr(self, 'is_parsing_ready') and self.is_parsing_ready:
             tic = time.time()
             pred_trees = list(self.parser.parse_iter(batch['words']))
@@ -119,9 +120,9 @@ class Model(pl.LightningModule):
             gold_trees = batch['trees']
             metric_stats = [sufficient_stats(gold_tree, pred_tree, language=self.language) for gold_tree, pred_tree in zip(gold_trees, pred_trees)]
             unfinished = sum(x.is_binary and x.comb.is_glue for x in pred_trees)
-            return corrects, word_count, period, metric_stats, unfinished
+            return corrects, word_count, sents_count, period, metric_stats, unfinished
         else:
-            return corrects, word_count, period
+            return corrects, word_count, sents_count, period
 
     def validation_epoch_end(self, outputs):
         correct_tags = sum(x[0] for x in outputs)
@@ -129,18 +130,19 @@ class Model(pl.LightningModule):
         accuracy = 100 * correct_tags / total_tags
         self.log("accuracy", accuracy, prog_bar=True)
 
-        total_time = sum(x[2] for x in outputs)
+        sents_count = sum(x[2] for x in outputs)
+        total_time = sum(x[3] for x in outputs)
         sents_per_second = sents_count / total_time
-        self.log("sent/sec", round(sents_per_second), prog_bar=True)
+        self.log("sent/s", round(sents_per_second), prog_bar=True)
 
         if hasattr(self, 'is_parsing_ready') and self.is_parsing_ready:
             delattr(self, 'parser')
-            metric_stats = [x for xs in outputs for x in xs[3]]
+            metric_stats = [x for xs in outputs for x in xs[4]]
             metrics = combine_stats(metric_stats)
             self.log("lf", metrics["labeled_dep_F"], prog_bar=True)
             self.log("uf", metrics["unlabeled_dep_F"], prog_bar=True)
 
-            is_incomplete = sum(x[4] for x in outputs)
+            is_incomplete = sum(x[5] for x in outputs)
             sents_count = len(metric_stats)
             self.log("incomplete", 100 * is_incomplete / sents_count, prog_bar=True)
 
