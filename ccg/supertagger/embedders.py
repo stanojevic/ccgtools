@@ -122,7 +122,7 @@ class NormalEmbedder(nn.Module):
 
 
 class TransformersEmbedder(nn.Module):
-    BERT_TYPES = ["bert-base-uncased", "roberta-base", "xlm-roberta-base"]
+    BERT_TYPES = ["bert-base-uncased", "roberta-base", "xlm-roberta-base", "hfl/chinese-roberta-wwm-ext"]
 
     def __init__(self, model_name: str, initialized: bool):
         super(TransformersEmbedder, self).__init__()

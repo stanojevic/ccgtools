@@ -1,7 +1,7 @@
 gradient clip : True
 batch size : 128
 
-embedder type : roberta-base
+embedder type : hfl/chinese-roberta-wwm-ext
 
 optimizer : Adam
 lr : 0.00005
