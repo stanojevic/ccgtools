@@ -36,7 +36,7 @@ class Parser:
                         os.unlink(list_file)
                     gdown.download(link_to_list, list_file, quiet=False)
                     with open(list_file) as fh:
-                        pretrained_links = dict(x.split("\t") for x in fh.readlines())
+                        pretrained_links = dict(x.strip().split("\t") for x in fh.readlines())
                     if model_name in pretrained_links:
                         gdown.download(pretrained_links[model_name], model_file, quiet=False)
                     else:
