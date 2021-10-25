@@ -39,7 +39,12 @@ class AStarSearch:
             puncconj_prob,
             use_normal_form
         )
-        atexit.register(self.astar.shutdown)
+        atexit.register(self.shutdown)
+
+    def shutdown(self):
+        if self.astar is not None:
+            self.astar.shutdown()
+            self.astar = None
 
     def parse_batch(self, sents, batch_tag_logprobs, batch_span_logprobs=None):
         """

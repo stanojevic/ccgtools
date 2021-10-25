@@ -86,9 +86,11 @@ public class MainSearch {
     }
 
     public void shutdown(){
-        this.service.shutdown();
-        this.service = null;
-        java.util.concurrent.ForkJoinPool.commonPool().shutdown();
+        if(this.service != null){
+            this.service.shutdown();
+            this.service = null;
+        }
+        // java.util.concurrent.ForkJoinPool.commonPool().shutdown();
     }
 
     public Future<List<String>> searchBatchFuture(List<List<String>> words,

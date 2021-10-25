@@ -9,7 +9,10 @@ from torch import nn
 import torch
 from pprint import pprint
 
+import warnings
+warnings.filterwarnings("ignore")
 import pytorch_lightning as pl
+warnings.filterwarnings("default")
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 from optuna import Trial
@@ -56,12 +59,14 @@ class Model(pl.LightningModule):
                                  nn.Linear(mlp_hid_dim, self.stag2i.voc_size),
                                  nn.LogSoftmax(dim=-1))
 
-        print("MODEL_HYPERPARAMETERS = ", file=stderr)
-        pprint(trial.params, stream=stderr)
+        if not initialized:
+            print("MODEL_HYPERPARAMETERS = ", file=stderr)
+            pprint(trial.params, stream=stderr)
         self.save_hyperparameters()
 
     def on_validation_start(self) -> None:
-        if hasattr(self, 'is_parsing_ready') and self.is_parsing_ready:
+        if hasattr(self, 'is_parsing_ready') and self.is_parsing_ready and \
+           not (hasattr(self, 'parser') and self.parser is not None):
             self.parser = Parser(self, words_per_batch=25 * self.batch_size)
 
     def forward(self, batch):
@@ -285,7 +290,7 @@ def objective(trial: Trial,
                 name=model_name
             )
         else:
-            logger = True
+            logger = False
         early_stop_callback = EarlyStopping(
             monitor=metric_to_monitor,
             min_delta=0.00,

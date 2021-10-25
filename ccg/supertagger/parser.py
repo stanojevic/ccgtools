@@ -24,7 +24,7 @@ class Parser:
             from ccg.supertagger.model import Model
             if model_file.startswith("pretrained:"):
                 model_name = model_file[len("pretrained:"):]
-                model_file = os.path.join(PRETRAINED_MODELS_DIR, model_name)
+                model_file = os.path.join(PRETRAINED_MODELS_DIR, f"{model_name}.ckpt")
                 if not os.path.isfile(model_file):
                     import gdown
                     link_to_list = r"https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/supertagger/configs/pretrained_models_locations.tsv"
@@ -67,6 +67,9 @@ class Parser:
             else:
                 device = 'cpu'
         self.model.to(device)
+
+    def shutdown(self):
+        self.search.shutdown()
 
     def parse_batch(self, sents):
         batch = [{'words': x} for x in sents]
