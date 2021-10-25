@@ -3,6 +3,7 @@ import ccg
 import torch
 import os
 from pathlib import Path
+import warnings
 
 PRETRAINED_MODELS_DIR = os.path.join(str(Path.home()), ".cache", "ccgtools", "models")
 
@@ -21,6 +22,7 @@ class Parser:
         self.do_tokenization = do_tokenization
 
         if type(model_file) == str:
+            warnings.filterwarnings("ignore")
             from ccg.supertagger.model import Model
             if model_file.startswith("pretrained:"):
                 model_name = model_file[len("pretrained:"):]
@@ -40,6 +42,7 @@ class Parser:
                     else:
                         raise Exception(f"Model {model_name} not found in the list of available models")
             self.model = Model.load_from_checkpoint(checkpoint_path=model_file)
+            warnings.filterwarnings("default")
         else:
             self.model = model_file
 

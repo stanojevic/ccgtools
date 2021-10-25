@@ -6,6 +6,7 @@ import torch
 from torch import nn
 import numpy as np
 from .any2int import Any2Int
+import warnings
 
 
 def construct_embedder(trial, initialized: bool, w2i, prefix: str = ""):
