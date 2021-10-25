@@ -57,7 +57,7 @@ def get_fasttext_model(lang_id, dim: int = 300):
         link = 'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/' + raw_fn
         print(f"downloading fasttext embeddings from {link}", file=stderr)
         import gdown
-        gdown.download(link, fn_bin_gz)
+        gdown.download(link, fn_bin_gz, quiet=False)
         print(file=stderr)
         print("unzipping fasttext embeddings", file=stderr)
         with gzip.open(fn_bin_gz, 'rb') as fh_in, \

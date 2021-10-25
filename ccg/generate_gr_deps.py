@@ -29,7 +29,7 @@ def _check_candc_is_installed():
     print(f"from {CANDC_WEB_LOCATION}", file=stderr)
     print(f"into {CANDC}", file=stderr)
 
-    gdown.download(CANDC_WEB_LOCATION,  CANDC+".tar.gz")
+    gdown.download(CANDC_WEB_LOCATION,  CANDC+".tar.gz", quiet=False)
 
     tar = tarfile.open(CANDC+".tar.gz", "r:gz")
     tar.extractall(path=CANDC_PARENT)
