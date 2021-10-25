@@ -13,6 +13,7 @@ def construct_embedder(trial, initialized: bool, w2i, prefix: str = ""):
                                               ["normal", "fixed-fasttext"] +
                                               TransformersEmbedder.BERT_TYPES +
                                               ["fixed-" + x for x in TransformersEmbedder.BERT_TYPES])
+    warnings.filterwarnings("ignore")
     if embedder_type == "normal":
         embedder_dim = trial.suggest_categorical(prefix + "embedder dim", [128, 256, 300, 512])
         fasttext_language = trial.suggest_categorical(prefix + "embedder fasttext lang", ['none', 'en', 'zh'])
@@ -24,6 +25,7 @@ def construct_embedder(trial, initialized: bool, w2i, prefix: str = ""):
         embedder = TransformersEmbedderFixed(embedder_type)
     else:
         embedder = TransformersEmbedder(embedder_type, initialized)
+    warnings.filterwarnings("default")
     return embedder
 
 
