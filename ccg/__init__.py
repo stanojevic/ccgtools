@@ -5,6 +5,24 @@ import jieba
 from ccg.penn_treebank_tokenizer import penn_tokenize
 
 
+def parser(parser_name,
+           words_per_batch : int = 25*100,
+           do_tokenization: bool = True,
+           max_steps: int = 1_000_000,
+           prune_beta: float = 0.0001,
+           prune_top_k_tags: int = 50,
+           num_cpus : int = None):
+    from ccg.supertagger.parser import Parser
+    parser = Parser(parser_name,
+                    words_per_batch=words_per_batch,
+                    do_tokenization=do_tokenization,
+                    max_steps=max_steps,
+                    prune_beta=prune_beta,
+                    prune_top_k_tags=prune_top_k_tags,
+                    num_cpus=num_cpus)
+    return parser
+
+
 def tokenize(sent, language):
     if language in ["Chinese", "zh"]:
         if type(sent) == list:

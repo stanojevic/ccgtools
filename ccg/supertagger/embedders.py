@@ -65,7 +65,11 @@ def get_fasttext_model(lang_id, dim: int = 300):
             fh_out.writelines(fh_in)
         os.remove(fn_bin_gz)
 
-    ft_model = ft.load_model(fn_bin)
+    from contextlib import redirect_stderr
+    from os import devnull
+    with open(devnull, 'w') as fnull, redirect_stderr(fnull) as err:
+        ft_model = ft.load_model(fn_bin)
+
     if dim != 300:
         from fasttext.util import reduce_model
         reduce_model(ft_model, dim)
