@@ -100,7 +100,10 @@ class CCGTagDataset(Dataset):
                     continue
                 words = [x[0] for x in tokens]
                 stags = [ccg.category(x[2]) for x in tokens]
-                yield words, stags, None
+                yield {
+                    "words": words,
+                    "stags": stags
+                }
 
 
 def combined_CCG_dataset(tree_file, stag_file, max_sent_len : int, tree_transform=None):
