@@ -13,7 +13,7 @@ To install just the tools for building and evaluating parsers run
     pip install "ccgtools@git+https://github.com/stanojevic/ccgtools"
 
 All pretrained models have preffix "pretrained:" and will be automatically downloaded when needed.
-The list of available models is available [here](https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/supertagger/configs/pretrained_models_locations.tsv).
+The list of available models is available [here](https://github.com/stanojevic/ccgtools/blob/main/ccg/supertagger/configs/pretrained_models_locations.tsv).
 
 ## Command Line Usage
 
