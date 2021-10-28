@@ -4,8 +4,14 @@ Don't play with this code yet. NOT READY
 
 ## Installation
 
-To install the full parser run `pip install "ccgtools[parser]@git+https://github.com/stanojevic/ccgtools"`<br/>
-To install just the tools for building and evaluating parsers run `pip install "ccgtools@git+https://github.com/stanojevic/ccgtools"`<br/>
+To install the full parser run
+
+    pip install "ccgtools[parser]@git+https://github.com/stanojevic/ccgtools"
+
+To install just the tools for building and evaluating parsers run
+
+    pip install "ccgtools@git+https://github.com/stanojevic/ccgtools"
+
 All pretrained models have preffix "pretrained:" and will be automatically downloaded when needed.
 The list of available models is available [here](https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/supertagger/configs/pretrained_models_locations.tsv).
 
