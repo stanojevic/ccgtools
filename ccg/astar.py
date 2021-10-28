@@ -53,7 +53,8 @@ class AStarSearch:
         :param numpy.ndarray batch_span_logprobs: matrix of shape (batch, words, words) and type np.float
         """
 
-        k = min(batch_tag_logprobs.shape[-1], self.prune_top_k_tags)
+        tags_total = batch_tag_logprobs.shape[-1]
+        k = min(tags_total, self.prune_top_k_tags) if self.prune_top_k_tags else tags_total
         batch_tag_indices = np.argpartition(batch_tag_logprobs, -k, axis=-1)[:, :, -k:]
         batch_tag_logprobs = np.take_along_axis(batch_tag_logprobs, batch_tag_indices, axis=-1)
         batch_thresholds = np.max(batch_tag_logprobs, axis=-1) + np.log(self.prune_beta)

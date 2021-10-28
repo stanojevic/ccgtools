@@ -1,6 +1,7 @@
 from typing import Any, Tuple, List
 import os
 from os.path import join
+from pathlib import Path
 from sys import stderr
 import time
 
@@ -209,6 +210,35 @@ class Model(pl.LightningModule):
         batch['word2tok_maps'] = _pad_and_tensorize([x['tokens'][tok_name]['word2tok_map'] for x in batch_raw])
 
         return batch
+
+    @staticmethod
+    def load_model(model_file):
+        if type(model_file) == str:
+            warnings.filterwarnings("ignore")
+            from ccg.supertagger.model import Model
+            if model_file.startswith("pretrained:"):
+                PRETRAINED_MODELS_DIR = os.path.join(str(Path.home()), ".cache", "ccgtools", "models")
+                model_name = model_file[len("pretrained:"):]
+                model_file = os.path.join(PRETRAINED_MODELS_DIR, f"{model_name}.ckpt")
+                if not os.path.isfile(model_file):
+                    import gdown
+                    link_to_list = r"https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/supertagger/configs/pretrained_models_locations.tsv"
+                    os.makedirs(PRETRAINED_MODELS_DIR, exist_ok=True)
+                    list_file = os.path.join(PRETRAINED_MODELS_DIR, "available_models_links.tsv")
+                    if os.path.isfile(list_file):
+                        os.unlink(list_file)
+                    gdown.download(link_to_list, list_file, quiet=False)
+                    with open(list_file) as fh:
+                        pretrained_links = dict(x.strip().split("\t") for x in fh.readlines())
+                    if model_name in pretrained_links:
+                        gdown.download(pretrained_links[model_name], model_file, quiet=False)
+                    else:
+                        raise Exception(f"Model {model_name} not found in the list of available models")
+            model = Model.load_from_checkpoint(checkpoint_path=model_file)
+            warnings.filterwarnings("default")
+        else:
+            model = model_file
+        return model
 
 
 def _pad_and_tensorize(list_batch):

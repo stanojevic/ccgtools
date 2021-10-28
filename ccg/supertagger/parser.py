@@ -2,10 +2,7 @@ from ccg.astar import AStarSearch
 import ccg
 import torch
 import os
-from pathlib import Path
 import warnings
-
-PRETRAINED_MODELS_DIR = os.path.join(str(Path.home()), ".cache", "ccgtools", "models")
 
 
 class Parser:
@@ -20,38 +17,12 @@ class Parser:
                  num_cpus : int = None):
         self.words_per_batch = words_per_batch
         self.do_tokenization = do_tokenization
-
-        if type(model_file) == str:
-            warnings.filterwarnings("ignore")
-            from ccg.supertagger.model import Model
-            if model_file.startswith("pretrained:"):
-                model_name = model_file[len("pretrained:"):]
-                model_file = os.path.join(PRETRAINED_MODELS_DIR, f"{model_name}.ckpt")
-                if not os.path.isfile(model_file):
-                    import gdown
-                    link_to_list = r"https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/supertagger/configs/pretrained_models_locations.tsv"
-                    os.makedirs(PRETRAINED_MODELS_DIR, exist_ok=True)
-                    list_file = os.path.join(PRETRAINED_MODELS_DIR, "available_models_links.tsv")
-                    if os.path.isfile(list_file):
-                        os.unlink(list_file)
-                    gdown.download(link_to_list, list_file, quiet=False)
-                    with open(list_file) as fh:
-                        pretrained_links = dict(x.strip().split("\t") for x in fh.readlines())
-                    if model_name in pretrained_links:
-                        gdown.download(pretrained_links[model_name], model_file, quiet=False)
-                    else:
-                        raise Exception(f"Model {model_name} not found in the list of available models")
-            self.model = Model.load_from_checkpoint(checkpoint_path=model_file)
-            warnings.filterwarnings("default")
-        else:
-            self.model = model_file
-
+        from .model import Model
+        self.model = Model.load_model(model_file)
         self.model.eval()
-
         ordered_cats = [tag for _, tag in self.model.stag2i.iter_item()]
         if num_cpus is None:
             num_cpus = 0
-
         self.search = AStarSearch(
             ordered_cats,
             max_steps=max_steps,
@@ -80,7 +51,16 @@ class Parser:
         tag_logprobs, span_logprobs = self.model(batch_prepared)
         return self.search.parse_batch(sents, tag_logprobs.detach().cpu().numpy(), span_logprobs.detach().cpu().numpy())
 
-    def parse_iter(self, sent_iter, return_as_str: bool = False):
+    def stag_iter(self, sent_iter):
+        for sent_batch in self._sent_iter_to_batch_iter(sent_iter):
+            batch = [{'words': x} for x in sent_batch]
+            batch_prepared = self.model.collate(batch)
+            tag_logprobs, _ = self.model(batch_prepared)
+            tag_logprobs = tag_logprobs.detach().cpu().numpy()
+            for i, sent in enumerate(sent_batch):
+                yield tag_logprobs[i][:len(sent)]
+
+    def parse_iter(self, sent_iter):
         future = []
         for sent_batch in self._sent_iter_to_batch_iter(sent_iter):
             bck = future
