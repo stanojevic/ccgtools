@@ -358,13 +358,13 @@ cdef class DerivationLoader:
                 elif select_rest:
                     selected.append(file)
             elif is_chinese:
-                if 2000 <= fid <=2980:
+                if (1 <= fid <= 815) or (1001 <= fid <= 1136) or (2000 <= fid <=2980):
                     if select_train:
                         selected.append(file)
-                elif 2981 <= fid <= 3029:
+                elif (900 <= fid <= 931) or (1148 <= fid <= 1151) or (2981 <= fid <= 3029):
                     if select_dev:
                         selected.append(file)
-                elif 3030 <= fid <= 3145:
+                elif (816 <= fid <= 885) or (1137 <= fid <= 1147) or (3030 <= fid <= 3145):
                     if select_test:
                         selected.append(file)
                 elif select_rest:

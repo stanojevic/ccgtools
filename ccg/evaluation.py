@@ -112,8 +112,13 @@ def _main_evaluate():
     if args.include_generate:
         from ccg.generate_gr_deps import evaluate as evaluate_generate
         gen_result = evaluate_generate(gold_trees, pred_trees)
-        for orig_name, new_name in [('labeled_dep', "generate labeled"),
-                                    ('unlabeled_dep', "generate unlabeled")]:
+        for orig_name, new_name in [('julia without fail labeled_dep', "generate julia (w/o failed parses) labeled"),
+                                    ('julia without fail unlabeled_dep', "generate julia (w/o failed parses) unlabeled"),
+                                    ('julia with fail labeled_dep', "generate julia (w/  failed parses) labeled"),
+                                    ('julia with fail unlabeled_dep', "generate julia (w/  failed parses) unlabeled"),
+                                    ('gr without fail labeled_dep', "generate gr    (w/o failed parses) labeled"),
+                                    ('gr with fail labeled_dep', "generate gr    (w/  failed parses) labeled"),
+                                    ]:
             table.append({
                 'P': num_to_str(gen_result, orig_name, "P"),
                 'R': num_to_str(gen_result, orig_name, "R"),

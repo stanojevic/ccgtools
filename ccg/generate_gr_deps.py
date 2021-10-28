@@ -1,6 +1,6 @@
 import ccg
 from ccg.dependencies import DepLink
-from ccg.evaluation import sufficient_stats_from_deps, combine_stats
+from ccg.evaluation import sufficient_stats_from_deps, combine_stats, prf_score_from_stats
 import tempfile
 import subprocess
 from os.path import realpath, dirname, join
@@ -11,6 +11,7 @@ from pathlib import Path
 from sys import stderr
 import gdown
 import tarfile
+from collections import Counter
 
 
 CANDC_WEB_LOCATION = "https://drive.google.com/uc?id=1EUU3fXv7O-618UO71YKot5wkQ-HBHOqN"
@@ -136,10 +137,39 @@ def generate_deps_standard(trees):
 
 
 def evaluate(gold_trees, pred_trees):
-    gold_deps = [x.deps() for x in gold_trees]
+    gold_deps = generate_deps_standard(gold_trees)
     pred_deps = generate_deps_standard(pred_trees)
     assert len(gold_deps) == len(pred_deps), "the number of trees differ"
-    return combine_stats(sufficient_stats_from_deps(g, p) for g, p in zip(gold_deps, pred_deps) if g and p)
+    julia_without_fail = combine_stats(sufficient_stats_from_deps(g, p) for g, p in zip(gold_deps, pred_deps) if g and p)
+    julia_with_fail = combine_stats(sufficient_stats_from_deps(g, p) for g, p in zip(gold_deps, pred_deps) if g)
+    res = dict()
+    for k, v in julia_without_fail.items():
+        res["julia without fail "+k] = v
+    for k, v in julia_with_fail.items():
+        res["julia with fail "+k] = v
+
+    gold_gr_deps = candc_generate_general_form(gold_trees, dep_type="g")
+    pred_gr_deps = candc_generate_general_form(pred_trees, dep_type="g")
+    overlap = 0
+    pred_size = 0
+    gold_size_with = 0
+    gold_size_without = 0
+    for g, p in zip(gold_gr_deps, pred_gr_deps):
+        overlap += sum((Counter(g) & Counter(p)).values())
+        pred_size += len(p)
+        gold_size_with += len(g)
+        if p:
+            gold_size_without += len(g)
+    p, r, f = prf_score_from_stats(overlap, gold_size_without, pred_size)
+    res['gr without fail labeled_dep_P'] = p
+    res['gr without fail labeled_dep_R'] = r
+    res['gr without fail labeled_dep_F'] = f
+    p, r, f = prf_score_from_stats(overlap, gold_size_with, pred_size)
+    res['gr with fail labeled_dep_P'] = p
+    res['gr with fail labeled_dep_R'] = r
+    res['gr with fail labeled_dep_F'] = f
+
+    return res
 
 
 _IGNORE_STR = r"""

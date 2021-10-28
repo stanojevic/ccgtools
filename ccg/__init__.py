@@ -3,6 +3,18 @@ from ccg.categories import Category
 from ccg import combinators as comb
 import jieba
 from ccg.penn_treebank_tokenizer import penn_tokenize
+from os import path
+import os
+
+
+_original_open = open
+open = DerivationLoader.iter_from_file
+
+
+def open_treebank_dir(dir_name):
+    dl = DerivationLoader
+    fs = dl.iter_from_treebank_train, dl.iter_from_treebank_dev, dl.iter_from_treebank_test, dl.iter_from_treebank_rest
+    return tuple(f(dir_name) for f in fs)
 
 
 def parser(parser_name,
@@ -32,15 +44,6 @@ def tokenize(sent, language):
         return penn_tokenize(sent, convert_parentheses=False)
     else:
         raise Exception(f"unsupported tokenization for {language} language")
-
-
-open = DerivationLoader.iter_from_file
-
-
-def open_treebank_dir(dir_name):
-    dl = DerivationLoader
-    fs = dl.iter_from_treebank_train, dl.iter_from_treebank_dev, dl.iter_from_treebank_test, dl.iter_from_treebank_rest
-    return tuple(f(dir_name) for f in fs)
 
 
 derivation = DerivationLoader.from_str
@@ -88,15 +91,16 @@ def _main_split():
     args = parser.parse_args()
 
     train, dev, test, rest = open_treebank_dir(args.treebank_dir)
+    os.makedirs(args.output_dir, exist_ok=True)
     for s, trees in [('train', train), ('dev', dev), ('test', test), ('rest', rest)]:
         print(f"processing {s}")
         fn_ccg = path.join(args.output_dir, s + ".auto")
         fn_stag = path.join(args.output_dir, s + ".stags")
         fn_words = path.join(args.output_dir, s + ".words")
         assert not path.exists(fn_ccg), f"file {fn_ccg} must be removed before proceeding"
-        with open(fn_ccg, "w") as fh_ccg, \
-             open(fn_stag, "w") as fh_stag, \
-             open(fn_words, "w") as fh_words:
+        with _original_open(fn_ccg, "w") as fh_ccg, \
+             _original_open(fn_stag, "w") as fh_stag, \
+             _original_open(fn_words, "w") as fh_words:
             for tree in trees:
                 print(tree.to_ccgbank_str(), file=fh_ccg)
                 print(" ".join(map(str, tree.stags())), file=fh_stag)
