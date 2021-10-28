@@ -4,7 +4,6 @@ from sys import stderr
 
 import ccg
 from ccg.combinators import Punc
-from ccg.penn_treebank_tokenizer import penn_tokenize
 from .any2int import Any2Int
 
 
@@ -100,7 +99,7 @@ class CCGTagDataset(Dataset):
                 if len(tokens) > max_sent_len:
                     continue
                 words = [x[0] for x in tokens]
-                stags = [Category.from_str(x[2]) for x in tokens]
+                stags = [ccg.category(x[2]) for x in tokens]
                 yield words, stags, None
 
 
