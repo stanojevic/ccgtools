@@ -289,14 +289,13 @@ class LaTeX:
         ccg_sty = join(realpath(join(getcwd(), dirname(__file__))), "ccg.sty")
         run_latex(LaTeX.to_latex(tree), out_file=fn, include_files=[ccg_sty])
 
-
     @staticmethod
     def to_latex(tree: Node):
         contains_semantics = False
         tree.assign_word_positions()
         tops = _node_topological_grouping(tree)
         terms = tops[0]
-        ws = ["\\rm " + escape_latex_math(t.word) for t in terms]
+        ws = ["\\rm \\text{" + escape_latex_math(t.word) + "}" for t in terms]
         out = [" & ".join(ws)]
         for level in tops:
             curr_pos = 0
@@ -360,6 +359,7 @@ class LaTeX:
             contains_semantics = False
         res = ""
         res += "\\documentclass{standalone}\n"
+        res += "\\usepackage[UTF8]{ctex}  % in case there are Chinese characters\n"
         res += "\\usepackage{xcolor}  % this is for coloring logical formulas\n"
         res += "\\usepackage{mathptmx}  % this is for nicer looking lambdas\n"
         res += "\\usepackage{amsmath}  % this is for \\operatorname\n"
@@ -367,7 +367,9 @@ class LaTeX:
         res += "% currently available at https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/ccg.sty"
         res += "\\usepackage{amsmath}\n"
         res += "\\begin{document}\n"
+        res += "\\begin{CJK*}{UTF8}{gbsn}  % in case there are Chinese characters\n"
         res += "\\deriv{%d}{\n\t%s\n}\n" % (len(terms), "\\\\\n\t".join(out))
+        res += "\\end{CJK*}  % in case there are Chinese characters\n"
         res += "\\end{document}\n"
         return res
 

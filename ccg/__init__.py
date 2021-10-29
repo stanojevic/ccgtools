@@ -1,10 +1,13 @@
 from ccg.derivation import Node, DerivationLoader
 from ccg.categories import Category
 from ccg import combinators as comb
-import jieba
 from ccg.penn_treebank_tokenizer import penn_tokenize
 from os import path
 import os
+
+import jieba
+import logging
+logging.getLogger("jieba").setLevel(logging.CRITICAL)
 
 
 _original_open = open
@@ -39,7 +42,7 @@ def tokenize(sent, language):
     if language in ["Chinese", "zh"]:
         if type(sent) == list:
             sent = " ".join(sent)
-        return jieba.cut(sent, cut_all=False)
+        return list(jieba.cut(sent, cut_all=False))
     elif language in ["English", "en"]:
         return penn_tokenize(sent, convert_parentheses=False)
     else:

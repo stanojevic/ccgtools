@@ -115,7 +115,8 @@ cdef class PredArgAssigner:
 
     def __cinit__(self, str lang, bint include_conj_term = False):
         self.lang = lang
-        self.is_English = lang.lower().startswith("english")
+        # self.is_English = lang.lower().startswith("english")  # TODO Chinese currently doesn't work well
+        self.is_English = True
         self.include_conj_term = include_conj_term
 
     def all_deps(self, Node tree):

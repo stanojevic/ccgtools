@@ -229,11 +229,11 @@ class Model(pl.LightningModule):
                         os.unlink(list_file)
                     gdown.download(link_to_list, list_file, quiet=False)
                     with open(list_file) as fh:
-                        pretrained_links = dict(x.strip().split("\t") for x in fh.readlines())
+                        pretrained_links = dict(x.strip().split() for x in fh.readlines())
                     if model_name in pretrained_links:
                         gdown.download(pretrained_links[model_name], model_file, quiet=False)
                     else:
-                        raise Exception(f"Model {model_name} not found in the list of available models")
+                        raise Exception(f"Model {model_name} not found in the list of available models: "+(pretrained_links.keys())+" .")
             model = Model.load_from_checkpoint(checkpoint_path=model_file)
             warnings.filterwarnings("default")
         else:

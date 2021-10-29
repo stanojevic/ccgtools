@@ -138,6 +138,7 @@ cdef class Node:
 
     def deps(self, lang=None, include_conj_term=False):
         if lang is None:
+            # lang = "English"
             if hasattr(self, 'language'):
                 lang = getattr(self, 'language')
             else:
