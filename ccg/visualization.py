@@ -291,6 +291,7 @@ class LaTeX:
 
     @staticmethod
     def to_latex(tree: Node):
+        is_chinese = getattr(tree, 'language', 'English') == "Chinese"
         contains_semantics = False
         tree.assign_word_positions()
         tops = _node_topological_grouping(tree)
@@ -359,7 +360,8 @@ class LaTeX:
             contains_semantics = False
         res = ""
         res += "\\documentclass{standalone}\n"
-        res += "\\usepackage[UTF8]{ctex}  % in case there are Chinese characters\n"
+        if is_chinese:
+            res += "\\usepackage[UTF8]{ctex}  % in case there are Chinese characters\n"
         res += "\\usepackage{xcolor}  % this is for coloring logical formulas\n"
         res += "\\usepackage{mathptmx}  % this is for nicer looking lambdas\n"
         res += "\\usepackage{amsmath}  % this is for \\operatorname\n"
@@ -367,9 +369,11 @@ class LaTeX:
         res += "% currently available at https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/ccg.sty"
         res += "\\usepackage{amsmath}\n"
         res += "\\begin{document}\n"
-        res += "\\begin{CJK*}{UTF8}{gbsn}  % in case there are Chinese characters\n"
+        if is_chinese:
+            res += "\\begin{CJK*}{UTF8}{gbsn}  % in case there are Chinese characters\n"
         res += "\\deriv{%d}{\n\t%s\n}\n" % (len(terms), "\\\\\n\t".join(out))
-        res += "\\end{CJK*}  % in case there are Chinese characters\n"
+        if is_chinese:
+            res += "\\end{CJK*}  % in case there are Chinese characters\n"
         res += "\\end{document}\n"
         return res
 
