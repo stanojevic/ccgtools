@@ -315,7 +315,7 @@ class LaTeX:
                 line_sem   += [" "]*skip
                 curr_pos = node.span[1]
                 if node.is_term:
-                    comb_cmd = "uuline"
+                    comb_cmd = "duline"
                 elif node.is_binary:
                     if node.comb.is_B_fwd or node.comb.is_B_bck:
                         f = "f" if node.comb.is_forward else "b"
@@ -340,7 +340,7 @@ class LaTeX:
                     else:
                         comb_cmd = "tc"
                 else:
-                    comb_cmd = "uuline"
+                    comb_cmd = "duline"
                 label = str(node.cat).replace("\\", "{\\bs}")
                 line_comb.append("\\%s{%d}" % (comb_cmd, span_size))
                 line_label.append("\\mc{%d}{\\it %s}" % (span_size, label))

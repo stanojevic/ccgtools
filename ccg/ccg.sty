@@ -109,7 +109,7 @@
   {\multicolumn{#1}{c}{#2}}
 %\newcommand{\less}{\\ \vspace{-.5ex}}
 % Rules, argument #1 gives the number of columns to cover.
-\newcommand{\uuline}[1]
+\newcommand{\duline}[1]
 {\mc{#1}{\hrulefill} }
 \newcommand{\fapply}[1]
 { \mc{#1}{\hrulefill_{>}} }
@@ -170,8 +170,8 @@
 \newcommand{\unfreeze}[1]
 {\mc{#1}{\hrulefill_{\mathbf{@}}}  }
 
-\newcommand{\ul}{\uuline{1}}
-\newcommand{\uulines}[1]{\uuline{#1}}
+\newcommand{\ul}{\duline{1}}
+\newcommand{\dulines}[1]{\duline{#1}}
 
 %\newcommand{\spreadUlines}[1]{
 %  Start \setcounter{ccg_counter}{1} \whiledo{\value{ccg_counter} < #1} { Part \arabic{ccg_counter} \stepcounter{ccg_counter} }
@@ -182,7 +182,7 @@
 %
 %\deriv{3}{
 %{\rm Mary}&{\rm prefers}& {\rm corduroy}\\
-%\uuline{1}& \uuline{1}    & \uuline{1}\\
+%\duline{1}& \duline{1}    & \duline{1}\\
 %\it NP   &\it (S\bs NP)/NP &\it  NP\\
 %         &     \fapply{2}\\
 %         & \mc{2}{\it S\bs NP}\\
@@ -192,7 +192,7 @@
 %
 %\deriv{5}{
 %\rm Mary &\rm  requests  &\rm  and   &\rm prefers &\rm corduroy\\
-%\uuline{1}&\uuline{1}&\uuline{1}&\uuline{1}&\uuline{1}\\
+%\duline{1}&\duline{1}&\duline{1}&\duline{1}&\duline{1}\\
 %\it NP &\it  (S\bs NP)/NP &\it CONJ&\it  (S\bs NP)/NP&\it       NP\\
 %&\conj{3}\\
 %&\mc{3}{\it  (S\bs NP)/NP}\\
@@ -203,7 +203,7 @@
 %}
 %\deriv{6}{
 %\rm   Mary &\rm   prefers &\rm  and  &\rm  I &\rm     detest&\rm   corduroy\\
-%\uuline{1}&\uuline{1}&\uuline{1}&\uuline{1}&\uuline{1}&\uuline{1}\\
+%\duline{1}&\duline{1}&\duline{1}&\duline{1}&\duline{1}&\duline{1}\\
 %\it   NP &\it   (S\bs NP)/NP&\it CONJ&\it    NP &\it   (S\bs NP)/NP &\it  NP\\
 %\ftype{1}&&&\ftype{1}\\
 %\it S/(S\bs NP) &&&\it S/(S\bs NP)\\
