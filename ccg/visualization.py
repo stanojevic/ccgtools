@@ -366,7 +366,7 @@ class LaTeX:
         res += "\\usepackage{mathptmx}  % this is for nicer looking lambdas\n"
         res += "\\usepackage{amsmath}  % this is for \\operatorname\n"
         res += "\\usepackage{ccg}  % you can find the necessary style file ccg.sty in the repository of the parser\n"
-        res += "% currently available at https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/ccg.sty"
+        res += "% currently available at https://raw.githubusercontent.com/stanojevic/ccgtools/main/ccg/ccg.sty\n"
         res += "\\usepackage{amsmath}\n"
         res += "\\begin{document}\n"
         if is_chinese:
