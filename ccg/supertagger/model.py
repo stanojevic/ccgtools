@@ -234,7 +234,8 @@ class Model(pl.LightningModule):
                         gdown.download(pretrained_links[model_name], model_file, quiet=False)
                     else:
                         raise Exception(f"Model {model_name} not found in the list of available models: "+(pretrained_links.keys())+" .")
-            model = Model.load_from_checkpoint(checkpoint_path=model_file)
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            model = Model.load_from_checkpoint(checkpoint_path=model_file, map_location=device)
             warnings.filterwarnings("default")
         else:
             model = model_file
