@@ -23,8 +23,12 @@ If you run them with `--help` flag they will provide the usage directions.
 
 ## Notebook
 
-You can [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stanojevic/ccgtools/blob/master/notebooks/demo.ipynb)
-the provided notebook and start playing with a CCG parser. It can take a couple of minutes for the Colab to install all the necessary dependencies, but after that is done everything should be fast.
+There are two notebooks included in the repository:
+
+* demo.ipynb [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stanojevic/ccgtools/blob/master/notebooks/demo.ipynb)
+that shows how to use the provided parser, different ways of visualizing derivations, extraction of semantic dependencies, and extraction of logical representation.
+It can take a couple of minutes for the Colab to install all the necessary dependencies, but after that is done everything should be fast.
+* processing\_effort.ipynb [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/stanojevic/ccgtools/blob/master/notebooks/processing_effort.ipynb) computes processing effort predictions for different CCG derivation trees. This follows descriptions from the papers that relate CCG parsing effort to brain activity ([paper 1](https://aclanthology.org/2021.cmcl-1.3.pdf) and [paper 2](https://arxiv.org/abs/2210.16147)).
 
 ## Author
 Miloš Stanojević
