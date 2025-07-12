@@ -30,6 +30,7 @@ setup(
     install_requires=install_requires,
     extras_require={"parser": install_requires_parser},
     zip_safe=False,
+    python_requires='>=3.9, <3.12',  # 3.12 didn't work last time I checked because tokenizers didn't have a binary released
     entry_points={
         'console_scripts': [
             'ccg-split = ccg:_main_split',
