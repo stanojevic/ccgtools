@@ -21,6 +21,9 @@ After the pip line above is exectued there are several commands that will be ava
 `ccg-eval`, `ccg-parser`, `ccg-supertagger` and `ccg-train`.
 If you run them with `--help` flag they will provide the usage directions.
 
+One thing to note is that the parser's code that does search is implemented in Java which requires further tweaks for very long sentences that can be memory and computationally intensive. Java by default doesn't reserve much memory so parser can run out of it on long sentences. To give Java Virtual Machine permision to use more memory run `export JAVA_TOOL_OPTIONS="-Xms512m -Xmx12g"`. I have set there the maximum value of RAM to 12 GB, but of course adapt that to your own machine. Even with large memory, the search can be very long if the sentence is very long and very ambiguous syntactically. To prevent parser from searching for a very long time you can set the parameter `--max-steps 1000000` (or some higher value if you are more patient than me).
+
+
 ## Notebook
 
 There are two notebooks included in the repository:
