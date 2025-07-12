@@ -4,5 +4,5 @@ pyyaml>=5.3.1
 tensorboard
 optuna>=2.3.0,<3.0.0
 transformers>=4.1.1,<=4.30.2
-fasttext==0.9.1
+fasttext>=0.9.3
 gdown
