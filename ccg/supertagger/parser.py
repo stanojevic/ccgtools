@@ -84,6 +84,13 @@ class Parser:
                 sent = sent.strip().split()
             if self.do_tokenization:
                 sent = ccg.tokenize(sent, self.model.language)
+            def word_replace(w):
+                # Replaces w if it has too many special tokens.
+                if sum([1 for c in w if c in '<>)(']) > 1:
+                    return 'UNK'
+                else:
+                    return w
+            sent = [word_replace(word) for word in sent]
             curr_batch.append(sent)
             curr_batch_max_sent_len = max(curr_batch_max_sent_len, len(sent))
             if curr_batch_max_sent_len*len(curr_batch) > self.words_per_batch:
